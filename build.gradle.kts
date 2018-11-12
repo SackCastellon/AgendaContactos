@@ -27,6 +27,11 @@ dependencies {
     implementation("org.openjfx:javafx-controls:$jfxVersion:$platform")
     implementation("org.openjfx:javafx-fxml:$jfxVersion:$platform")
 
+    implementation("org.kordamp.ikonli:ikonli-javafx:11.0.0")
+    implementation("org.kordamp.ikonli:ikonli-fontawesome-pack:11.0.0")
+
+    implementation("ch.qos.logback:logback-classic:1.3.0-alpha4")
+
     testImplementation("junit:junit:4.12")
 }
 
