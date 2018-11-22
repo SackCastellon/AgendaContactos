@@ -2,16 +2,17 @@ package es.uji.ei1039.agenda.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.jetbrains.annotations.NotNull;
 
 public final class Phone {
 
-    private final StringProperty phone = new SimpleStringProperty();
+    private final @NotNull StringProperty phone = new SimpleStringProperty();
 
     public String getPhone() {
         return phone.get();
     }
 
-    public StringProperty phoneProperty() {
+    public @NotNull StringProperty phoneProperty() {
         return phone;
     }
 
@@ -20,13 +21,13 @@ public final class Phone {
     }
 
 
-    private final StringProperty label = new SimpleStringProperty();
+    private final @NotNull StringProperty label = new SimpleStringProperty();
 
     public String getLabel() {
         return label.get();
     }
 
-    public StringProperty labelProperty() {
+    public @NotNull StringProperty labelProperty() {
         return label;
     }
 
