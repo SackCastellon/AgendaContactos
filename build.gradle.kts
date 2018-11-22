@@ -1,17 +1,7 @@
-import org.gradle.internal.os.OperatingSystem
-
 plugins {
     java
     application
-    id("com.google.osdetector") version "1.6.0"
     id("com.github.ben-manes.versions") version "0.20.0"
-}
-
-val jfxVersion: String by project
-val platform: String = when (val os = osdetector.os) {
-    "windows" -> "win"
-    "osx" -> "mac"
-    else -> os
 }
 
 group = "es.uji.ei1039"
@@ -22,15 +12,14 @@ repositories {
 }
 
 dependencies {
-    implementation("org.openjfx:javafx-base:$jfxVersion:$platform")
-    implementation("org.openjfx:javafx-graphics:$jfxVersion:$platform")
-    implementation("org.openjfx:javafx-controls:$jfxVersion:$platform")
-    implementation("org.openjfx:javafx-fxml:$jfxVersion:$platform")
-
-    implementation("org.kordamp.ikonli:ikonli-javafx:11.0.0")
-    implementation("org.kordamp.ikonli:ikonli-fontawesome-pack:11.0.0")
+    implementation("org.kordamp.ikonli:ikonli-javafx:2.4.0")
+    implementation("org.kordamp.ikonli:ikonli-fontawesome-pack:2.4.0")
 
     implementation("ch.qos.logback:logback-classic:1.3.0-alpha4")
+
+    implementation("org.jetbrains:annotations:16.0.3")
+    implementation("org.projectlombok:lombok:1.18.4")
+    annotationProcessor("org.projectlombok:lombok:1.18.4")
 
     testImplementation("junit:junit:4.12")
 }
@@ -40,28 +29,6 @@ application {
 }
 
 tasks.withType<JavaCompile> {
-    sourceCompatibility = "11"
-    targetCompatibility = "11"
-
-    doFirst {
-        options.compilerArgs = listOf(
-            "--module-path", classpath.asPath,
-            "--add-modules", "javafx.base",
-            "--add-modules", "javafx.graphics",
-            "--add-modules", "javafx.controls",
-            "--add-modules", "javafx.fxml"
-        )
-    }
-}
-
-tasks.withType<JavaExec> {
-    doFirst {
-        jvmArgs = listOf(
-            "--module-path", classpath.asPath,
-            "--add-modules", "javafx.base",
-            "--add-modules", "javafx.graphics",
-            "--add-modules", "javafx.controls",
-            "--add-modules", "javafx.fxml"
-        )
-    }
+    sourceCompatibility = "8"
+    targetCompatibility = "8"
 }
