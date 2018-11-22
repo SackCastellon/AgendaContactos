@@ -12,6 +12,8 @@ repositories {
 }
 
 dependencies {
+    implementation("org.controlsfx:controlsfx:8.40.14")
+    
     implementation("org.kordamp.ikonli:ikonli-javafx:2.4.0")
     implementation("org.kordamp.ikonli:ikonli-fontawesome-pack:2.4.0")
 
