@@ -9,22 +9,25 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <Menu text="_File">
-                <MenuItem text="_New"/>
-                <accelerator>
-                    <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                </accelerator>
+                <MenuItem onAction="#handleNew" text="_New">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                    </accelerator>
+                </MenuItem>
                 <SeparatorMenuItem mnemonicParsing="false"/>
-                <MenuItem text="_Open"/>
-                <accelerator>
-                    <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                </accelerator>
+                <MenuItem onAction="#handleOpen" text="_Open">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                    </accelerator>
+                </MenuItem>
                 <SeparatorMenuItem mnemonicParsing="false"/>
-                <MenuItem text="_Save"/>
-                <accelerator>
-                    <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                </accelerator>
+                <MenuItem onAction="#handleSave" text="_Save">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                    </accelerator>
+                </MenuItem>
                 <SeparatorMenuItem mnemonicParsing="false"/>
-                <MenuItem text="_Quit"/>
+                <MenuItem onAction="#handleQuit" text="_Quit"/>
             </Menu>
             <Menu text="_Edit">
                 <MenuItem text="Delete"/>
