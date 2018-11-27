@@ -54,4 +54,8 @@ class ContactOverview {
     private fun handleDeleteContact(event: ActionEvent) {
         // TODO
     }
+
+    fun setMainApp(mainApp : App){
+        this.mainApp = mainApp
+    }
 }

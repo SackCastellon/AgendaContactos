@@ -1,6 +1,7 @@
 package es.uji.ei1039.agenda
 
-import es.uji.ei1039.agenda.controller.EditPersonController
+import es.uji.ei1039.agenda.controller.ContactOverview
+import es.uji.ei1039.agenda.controller.EditContact
 import es.uji.ei1039.agenda.model.Contact
 import javafx.application.Application
 import javafx.fxml.FXMLLoader
@@ -49,8 +50,9 @@ class App : Application() {
         try {
             val loader = FXMLLoader(javaClass.getResource("views/ContactOverview.fxml"))
             val contactOverview: BorderPane = loader.load()
-
             rootLayout.center = contactOverview
+            val controller = loader.getController<ContactOverview>()
+            controller.setMainApp(this)
         } catch (e: IOException) {
             log.error("Error loading 'ContactOverview.fxml'", e)
         }
@@ -59,8 +61,8 @@ class App : Application() {
     fun showContactEditDialog(contact: Contact): Boolean {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
-            val loader = FXMLLoader(javaClass.getResource("view/PersonEditDialog.fxml"))
-            val page: AnchorPane = loader.load()
+            val loader = FXMLLoader(javaClass.getResource("views/EditContact.fxml"))
+            val page: BorderPane = loader.load()
 
             // Create the dialog Stage.
             val dialogStage = Stage()
@@ -71,9 +73,9 @@ class App : Application() {
             dialogStage.scene = scene
 
             // Set the person into the controller.
-            val controller = loader.getController<EditPersonController>()
-            //controller.setDialogStage(dialogStage);
-            //controller.setPerson(person);
+            val controller = loader.getController<EditContact>()
+            controller.dialogStage = dialogStage
+            controller.contact = contact
 
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait()
