@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="es.uji.ei1039.agenda.controller.ContactOverview">
+            fx:controller="es.uji.ei1039.agenda.view.ContactOverview">
     <center>
         <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <ScrollPane fitToHeight="true" fitToWidth="true">

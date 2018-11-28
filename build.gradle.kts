@@ -11,12 +11,18 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    jcenter()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
 
 dependencies {
     // Kotlin Standard Library
     implementation(kotlin("stdlib-jdk8"))
+
+    // Dependency Injection
+    implementation("org.koin:koin-core:1.0.2")
+    implementation("org.koin:koin-core-ext:1.0.2")
+    implementation("org.koin:koin-logger-slf4j:1.0.2")
 
     // User Interface
     implementation("no.tornado:tornadofx:1.7.18-SNAPSHOT")
@@ -33,7 +39,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.3.0-alpha4")
 
     // Testing
-    testImplementation("junit:junit:4.12")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.1")
 }
 
 application {

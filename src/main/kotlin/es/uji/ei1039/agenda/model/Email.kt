@@ -1,9 +1,7 @@
 package es.uji.ei1039.agenda.model
 
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.property.*
+import tornadofx.ItemViewModel
 import tornadofx.getValue
 import tornadofx.setValue
 
@@ -17,5 +15,10 @@ class Email {
     enum class Label {
         PERSONAL,
         WORK
+    }
+
+    class ViewModel(email: Email) : ItemViewModel<Email>(email) {
+        val email: Property<String> = bind(Email::emailProperty)
+        val label: Property<Label> = bind(Email::labelProperty)
     }
 }

@@ -1,20 +1,20 @@
-package es.uji.ei1039.agenda.controller
+package es.uji.ei1039.agenda.view
 
+import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import java.net.URL
-import java.util.*
+import javafx.scene.layout.BorderPane
+import tornadofx.View
+import tornadofx.get
 
-class RootLayout {
+class RootLayout : View() {
 
-    @FXML
-    private lateinit var resources: ResourceBundle
+    override val root: BorderPane by fxml(hasControllerAttribute = true)
 
-    @FXML
-    private lateinit var location: URL
+    init {
+        title = messages["title"]
 
-    @FXML
-    private fun initialize() {
+        root.center<ContactOverview>()
     }
 
     @FXML
@@ -34,6 +34,6 @@ class RootLayout {
 
     @FXML
     private fun handleQuit(event: ActionEvent) {
-        // TODO
+        Platform.exit()
     }
 }
