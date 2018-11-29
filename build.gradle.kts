@@ -43,7 +43,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "es.uji.ei1039.agenda.App"
+    mainClassName = "es.uji.ei1039.agenda.Agenda"
 }
 
 tasks.withType<KotlinCompile> {
