@@ -12,8 +12,8 @@ class ContactEditor : View() {
 
     override val root: BorderPane by fxml(hasControllerAttribute = true)
 
-    private val name: TextField by fxid() // TODO Add to FXML
-    private val surname: TextField by fxid() // TODO Add to FXML
+    private val tf_nom: TextField by fxid()
+    private val tf_ap: TextField by fxid()
 
     /** The contact to be edited. If no contact is passed, then a new contact is created. */
     val contact: Contact by param(Contact())
