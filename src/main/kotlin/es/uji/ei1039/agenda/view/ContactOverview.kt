@@ -1,34 +1,45 @@
 package es.uji.ei1039.agenda.view
 
+import es.uji.ei1039.agenda.data.IRepository
 import es.uji.ei1039.agenda.model.Contact
+import javafx.beans.binding.Bindings
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.Button
 import javafx.scene.control.TableView
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.GridPane
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import tornadofx.Fragment
-import tornadofx.selectedItem
+import tornadofx.*
 
 class ContactOverview : Fragment() {
+
+    private val contacts: IRepository<Contact> by di("contacts")
 
     override val root: BorderPane by fxml(hasControllerAttribute = true)
 
     private val contactsTable: TableView<Contact> by fxid()
+    private val detailsPane: GridPane by fxid()
 
     private val newContact: Button by fxid()
     private val editContact: Button by fxid()
     private val deleteContact: Button by fxid()
 
+    init {
+        contactsTable.items = contacts.getAll()
+        contactsTable.apply {
+            column<Contact, String>(messages["column.name"]) { with(it.value) { Bindings.format("%s %s", nameProperty, surnameProperty) } }
+        }
+
+        editContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
+        deleteContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
+    }
+
     @FXML
     private fun handleNewContact(event: ActionEvent) {
-        val contactEditor = find<ContactEditor>().also { it.openModal(escapeClosesWindow = false, resizable = false, block = true) }
-
-        if (contactEditor.success) {
-            val contact = contactEditor.contact
-            // TODO Save contact
-        }
+        val editor = find<ContactEditor>().also { it.openModal(escapeClosesWindow = false, resizable = false, block = true) }
+        if (editor.success) contacts.add(editor.contact)
     }
 
     @FXML
@@ -40,19 +51,22 @@ class ContactOverview : Fragment() {
             return
         }
 
-        val contactEditor = find<ContactEditor>(ContactEditor::contact to selectedContact)
+        val editor = find<ContactEditor>(ContactEditor::contact to selectedContact)
             .also { it.openModal(escapeClosesWindow = false, resizable = false, block = true) }
 
-        if (contactEditor.success) {
-            val contact = contactEditor.contact
-            // TODO Save contact
-        }
-
+        if (editor.success) contacts.add(editor.contact)
     }
 
     @FXML
     private fun handleDeleteContact(event: ActionEvent) {
-        // TODO
+        val selectedContact = contactsTable.selectedItem
+
+        if (selectedContact == null) {
+            logger.error("There is no selected contact to be deleted!")
+            return
+        }
+
+        contacts.remove(selectedContact)
     }
 
     companion object {

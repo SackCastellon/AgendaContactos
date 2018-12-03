@@ -25,8 +25,8 @@ class Contact {
     class ViewModel(contact: Contact) : ItemViewModel<Contact>(contact) {
         val name: Property<String> = bind(Contact::nameProperty)
         val surname: Property<String> = bind(Contact::surnameProperty)
-        val phones: Property<ObservableList<Phone>> = bind(Contact::phonesProperty)
-        val emails: Property<ObservableList<Email>> = bind(Contact::emailsProperty)
-        val groups: Property<ObservableList<Group>> = bind(Contact::groupsProperty)
+        val phones: ObservableList<Phone> = bind(Contact::phonesProperty)
+        val emails: ObservableList<Email> = bind(Contact::emailsProperty)
+        val groups: ObservableList<Group> = bind(Contact::groupsProperty)
     }
 }

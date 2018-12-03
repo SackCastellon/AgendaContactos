@@ -26,6 +26,7 @@ dependencies {
 
     // User Interface
     implementation("no.tornado:tornadofx:1.7.18-SNAPSHOT")
+    implementation("no.tornado:tornadofx-controlsfx:0.1.1")
     implementation("org.controlsfx:controlsfx:8.40.14")
 
     // Icons
@@ -39,7 +40,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.3.0-alpha4")
 
     // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.2")
 }
 
 application {
