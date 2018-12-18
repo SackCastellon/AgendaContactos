@@ -5,6 +5,9 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 
 class GroupRepository : IRepository<Group> {
+    override fun getSuggested(userText: String): List<Group> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     private val groups: ObservableList<Group> = FXCollections.observableArrayList()
 

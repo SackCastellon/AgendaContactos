@@ -2,12 +2,18 @@ package es.uji.ei1039.agenda.view
 
 import es.uji.ei1039.agenda.data.IRepository
 import es.uji.ei1039.agenda.model.Contact
+import es.uji.ei1039.agenda.util.converter.ContactStringConverter
 import javafx.beans.binding.Bindings
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.Button
 import javafx.scene.control.TableView
+import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
+import org.controlsfx.control.textfield.AutoCompletionBinding
+import org.controlsfx.control.textfield.TextFields
 import javafx.scene.layout.GridPane
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,8 +31,14 @@ class ContactOverview : Fragment() {
     private val newContact: Button by fxid()
     private val editContact: Button by fxid()
     private val deleteContact: Button by fxid()
+    private val searchBox: TextField by fxid()
+
+    private val provider: ObjectProperty<IRepository<Contact>> = SimpleObjectProperty()
 
     init {
+        val completionBinding: AutoCompletionBinding<Contact> = TextFields.bindAutoCompletion(searchBox, this::getSuggestions, ContactStringConverter)
+        completionBinding.minWidthProperty().bind(searchBox.minWidthProperty())
+        completionBinding.setOnAutoCompleted { event -> search(event.completion) }
         contactsTable.items = contacts.getAll()
         contactsTable.apply {
             column<Contact, String>(messages["column.name"]) { with(it.value) { Bindings.format("%s %s", nameProperty, surnameProperty) } }
@@ -35,6 +47,16 @@ class ContactOverview : Fragment() {
         editContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
         deleteContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
     }
+
+    private fun search(contact : Contact) {
+
+
+    }
+
+    private fun getSuggestions( suggestionRequest : AutoCompletionBinding.ISuggestionRequest): List<Contact> {
+        return provider.get().getSuggested(suggestionRequest.userText)
+    }
+
 
     @FXML
     private fun handleNewContact(event: ActionEvent) {

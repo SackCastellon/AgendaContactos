@@ -23,6 +23,8 @@ dependencies {
     implementation("org.koin:koin-core:1.0.2")
     implementation("org.koin:koin-core-ext:1.0.2")
     implementation("org.koin:koin-logger-slf4j:1.0.2")
+    implementation("com.github.ben-manes.caffeine:caffeine:2.6.2")
+    implementation("com.google.guava:guava:27.0.1-jre")
 
     // User Interface
     implementation("no.tornado:tornadofx:1.7.18-SNAPSHOT")
