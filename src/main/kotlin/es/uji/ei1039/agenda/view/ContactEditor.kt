@@ -39,26 +39,31 @@ class ContactEditor : View() {
     init {
         title = messages["title"]
         l_tit.text = messages["title"]
+
+        val gdesp = ChoiceBox<Group>()
         if (mode == Mode.EDIT) {
             tf_nom.text = contact.name
             tf_ap.text = contact.surname
             contact.phonesProperty.forEach { phone -> tel_box.children.add(TextField(phone.phone)) }
-            tel_box.children.add(TextField())
+
             contact.emailsProperty.forEach { email -> em_box.children.add(TextField(email.email)) }
-            em_box.children.add(TextField())
 
             contact.groupsProperty.forEach { group -> val box = HBox(); box.add(Label(group.name));box.add(Button("X"));gp_box.children.add(box); }
-            val gdesp = ChoiceBox<Group>()
+
             groups.getAll().forEach { group ->
                 if (!contact.groupsProperty.get().contains(group)) {
                     gdesp.items.add(group)
                 }
             }
-            gp_box.add(gdesp)
             contact.groupsProperty.forEach { group -> val box = HBox(); box.add(Label(group.name));box.add(Button("X"));gp_box.children.add(box); }
             gp_box.add(ChoiceBox<Group>())
 
+        } else{
+            gdesp.items.addAll(groups.getAll())
         }
+        tel_box.children.add(TextField())
+        em_box.children.add(TextField())
+        gp_box.add(gdesp)
     }
 
     enum class Mode { CREATE, EDIT }
