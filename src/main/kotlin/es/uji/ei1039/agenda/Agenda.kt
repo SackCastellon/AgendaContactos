@@ -13,7 +13,11 @@ class Agenda : App(RootLayout::class) {
         FX.dicontainer = KoinContainer
         Directories.create()
         DatabaseManager
+
+
     }
+
+
 }
 
 fun main(args: Array<String>): Unit = launch<Agenda>(args)

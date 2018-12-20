@@ -7,11 +7,15 @@ import org.jetbrains.exposed.sql.*
 
 object GroupsDao : IDao<Group> {
 
+
+
     private val default: List<Group> = listOf(
         Group.New().apply { name = "Familia" },
         Group.New().apply { name = "Amigos" },
         Group.New().apply { name = "Trabajo" }
     )
+
+
 
     override fun add(item: Group): Int {
         require(item is Group.New)
