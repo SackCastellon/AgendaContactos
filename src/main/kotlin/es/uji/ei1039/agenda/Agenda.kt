@@ -1,8 +1,6 @@
 package es.uji.ei1039.agenda
 
 import es.uji.ei1039.agenda.data.DatabaseManager
-import es.uji.ei1039.agenda.data.dao.ContactsDao
-import es.uji.ei1039.agenda.model.Contact
 import es.uji.ei1039.agenda.util.Directories
 import es.uji.ei1039.agenda.util.KoinContainer
 import es.uji.ei1039.agenda.view.RootLayout
@@ -15,11 +13,7 @@ class Agenda : App(RootLayout::class) {
         FX.dicontainer = KoinContainer
         Directories.create()
         DatabaseManager
-
     }
 }
 
-fun main(args: Array<String>) {
-    // Setup dependency injection framework to work with TornadoFX
-    launch<Agenda>(args)
-}
+fun main(args: Array<String>): Unit = launch<Agenda>(args)

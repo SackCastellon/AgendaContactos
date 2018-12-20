@@ -78,7 +78,9 @@ object ContactsDao : IDao<Contact> {
 
     override fun remove(id: Int) {
         require(id >= 0)
-        dbQuery { Contacts.deleteWhere { Contacts.id eq id } }
+        dbQuery {
+            Contacts.deleteWhere { Contacts.id eq id }
+        }
     }
 }
 

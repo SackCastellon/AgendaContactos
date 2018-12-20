@@ -19,14 +19,22 @@ object EmailsDao : IDao<Email> {
 
     override fun get(id: Int): Email? {
         require(id >= 0)
-        return dbQuery { Emails.select { Emails.id eq id } }.singleOrNull()?.toEmail()
+        return dbQuery {
+            Emails.select { Emails.id eq id }.singleOrNull()?.toEmail()
+        }
     }
 
-    override fun getAll(): List<Email> = dbQuery { Emails.selectAll() }.map { it.toEmail() }
+    override fun getAll(): List<Email> {
+        return dbQuery {
+            Emails.selectAll().map { it.toEmail() }
+        }
+    }
 
     override fun remove(id: Int) {
         require(id >= 0)
-        dbQuery { Emails.deleteWhere { Emails.id eq id } }
+        dbQuery {
+            Emails.deleteWhere { Emails.id eq id }
+        }
     }
 }
 

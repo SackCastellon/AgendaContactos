@@ -24,14 +24,22 @@ object GroupsDao : IDao<Group> {
 
     override fun get(id: Int): Group? {
         require(id >= 0)
-        return dbQuery { Groups.select { Groups.id eq id } }.singleOrNull()?.toGroup()
+        return dbQuery {
+            Groups.select { Groups.id eq id }.singleOrNull()?.toGroup()
+        }
     }
 
-    override fun getAll(): List<Group> = dbQuery { Groups.selectAll() }.map { it.toGroup() }
+    override fun getAll(): List<Group> {
+        return dbQuery {
+            Groups.selectAll().map { it.toGroup() }
+        }
+    }
 
     override fun remove(id: Int) {
         require(id >= 0)
-        dbQuery { Groups.deleteWhere { Groups.id eq id } }
+        dbQuery {
+            Groups.deleteWhere { Groups.id eq id }
+        }
     }
 }
 

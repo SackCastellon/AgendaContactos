@@ -19,14 +19,22 @@ object PhonesDao : IDao<Phone> {
 
     override fun get(id: Int): Phone? {
         require(id >= 0)
-        return dbQuery { Phones.select { Phones.id eq id } }.singleOrNull()?.toPhone()
+        return dbQuery {
+            Phones.select { Phones.id eq id }.singleOrNull()?.toPhone()
+        }
     }
 
-    override fun getAll(): List<Phone> = dbQuery { Phones.selectAll() }.map { it.toPhone() }
+    override fun getAll(): List<Phone> {
+        return dbQuery {
+            Phones.selectAll().map { it.toPhone() }
+        }
+    }
 
     override fun remove(id: Int) {
         require(id >= 0)
-        dbQuery { Phones.deleteWhere { Phones.id eq id } }
+        dbQuery {
+            Phones.deleteWhere { Phones.id eq id }
+        }
     }
 }
 
