@@ -47,11 +47,15 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.25.2")
     implementation("org.postgresql:postgresql:42.2.5")
 
+    // Directories
+    implementation("io.github.soc:directories:10")
+
     // Validation
     implementation("com.googlecode.libphonenumber:libphonenumber:8.10.2")
 
     // Logging
     implementation("ch.qos.logback:logback-classic:1.3.0-alpha4")
+    implementation("io.github.microutils:kotlin-logging:1.6.10")
 
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.2")

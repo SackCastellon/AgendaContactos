@@ -5,12 +5,23 @@ import tornadofx.ItemViewModel
 import tornadofx.getValue
 import tornadofx.setValue
 
-class Email {
-    val emailProperty: StringProperty = SimpleStringProperty()
+sealed class Email(
+    val id: Int,
+    email: String = "",
+    label: Label? = null
+) {
+    val emailProperty: StringProperty = SimpleStringProperty(email)
     var email: String by emailProperty
 
-    val labelProperty: ObjectProperty<Label> = SimpleObjectProperty()
+    val labelProperty: ObjectProperty<Label> = SimpleObjectProperty(label)
     var label: Label by labelProperty
+
+    class New : Email(-1)
+    class Existing(
+        id: Int,
+        email: String,
+        label: Label
+    ) : Email(id, email, label)
 
     enum class Label {
         PERSONAL,

@@ -5,12 +5,23 @@ import tornadofx.ItemViewModel
 import tornadofx.getValue
 import tornadofx.setValue
 
-class Phone {
-    val phoneProperty: StringProperty = SimpleStringProperty()
+sealed class Phone(
+    val id: Int,
+    phone: String = "",
+    label: Label? = null
+) {
+    val phoneProperty: StringProperty = SimpleStringProperty(phone)
     var phone: String by phoneProperty
 
-    val labelProperty: ObjectProperty<Label> = SimpleObjectProperty()
+    val labelProperty: ObjectProperty<Label> = SimpleObjectProperty(label)
     var label: Label by labelProperty
+
+    class New : Phone(-1)
+    class Existing(
+        id: Int,
+        phone: String,
+        label: Label
+    ) : Phone(id, phone, label)
 
     enum class Label {
         HOME,

@@ -1,8 +1,8 @@
 package es.uji.ei1039.agenda.util
 
-import es.uji.ei1039.agenda.data.ContactRepository
-import es.uji.ei1039.agenda.data.GroupRepository
-import es.uji.ei1039.agenda.data.IRepository
+import es.uji.ei1039.agenda.data.dao.ContactsDao
+import es.uji.ei1039.agenda.data.dao.GroupsDao
+import es.uji.ei1039.agenda.data.dao.IDao
 import es.uji.ei1039.agenda.model.Contact
 import es.uji.ei1039.agenda.model.Group
 import org.koin.dsl.module.module
@@ -19,6 +19,6 @@ object KoinContainer : DIContainer {
 }
 
 private val koinModule = module {
-    single<IRepository<Contact>>("contacts") { ContactRepository() }
-    single<IRepository<Group>>("groups") { GroupRepository() }
+    single<IDao<Contact>>("contacts") { ContactsDao }
+    single<IDao<Group>>("groups") { GroupsDao }
 }

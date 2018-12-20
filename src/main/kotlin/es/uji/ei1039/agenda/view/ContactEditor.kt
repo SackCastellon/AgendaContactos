@@ -1,10 +1,9 @@
 package es.uji.ei1039.agenda.view
 
 
-import es.uji.ei1039.agenda.data.IRepository
+import es.uji.ei1039.agenda.data.dao.IDao
 import es.uji.ei1039.agenda.model.Contact
 import es.uji.ei1039.agenda.model.Group
-import javafx.collections.ObservableList
 import javafx.scene.control.Button
 import javafx.scene.control.ChoiceBox
 import javafx.scene.control.Label
@@ -27,10 +26,11 @@ class ContactEditor : View() {
     private val gp_box: VBox by fxid()
 
     /** The contact to be edited. If no contact is passed, then a new contact is created. */
-    val contact: Contact by param(Contact())
-    val groups: IRepository<Group> by param()
+    val contact: Contact by param(Contact.New())
     /** The mode in which the editor is open */
     val mode: Mode = if (params.containsKey(ContactEditor::contact.name)) Mode.EDIT else Mode.CREATE
+
+    private val groups: IDao<Group> by di("groups")
 
     /** Whether the contact was edited successfully (save button is pressed). */
     var success: Boolean = false // TODO Set to true if the contact is edited successfully
@@ -39,18 +39,24 @@ class ContactEditor : View() {
     init {
         title = messages["title"]
         l_tit.text = messages["title"]
-        if(mode == Mode.EDIT) {
+        if (mode == Mode.EDIT) {
             tf_nom.text = contact.name
             tf_ap.text = contact.surname
-            contact.phonesProperty.forEach{ phone -> tel_box.children.add(TextField(phone.phone)) }
+            contact.phonesProperty.forEach { phone -> tel_box.children.add(TextField(phone.phone)) }
             tel_box.children.add(TextField())
-            contact.emailsProperty.forEach{ email -> em_box.children.add(TextField(email.email))}
+            contact.emailsProperty.forEach { email -> em_box.children.add(TextField(email.email)) }
             em_box.children.add(TextField())
 
-            contact.groupsProperty.forEach{ group -> val box = HBox(); box.add(Label(group.name));box.add(Button("X"));gp_box.children.add(box);}
+            contact.groupsProperty.forEach { group -> val box = HBox(); box.add(Label(group.name));box.add(Button("X"));gp_box.children.add(box); }
             val gdesp = ChoiceBox<Group>()
-            groups.getAll().forEach{ group -> if(!contact.groupsProperty.get().contains(group)){gdesp.items.add(group)}}
+            groups.getAll().forEach { group ->
+                if (!contact.groupsProperty.get().contains(group)) {
+                    gdesp.items.add(group)
+                }
+            }
             gp_box.add(gdesp)
+            contact.groupsProperty.forEach { group -> val box = HBox(); box.add(Label(group.name));box.add(Button("X"));gp_box.children.add(box); }
+            gp_box.add(ChoiceBox<Group>())
 
         }
     }
