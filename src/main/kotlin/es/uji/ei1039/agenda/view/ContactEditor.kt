@@ -1,6 +1,7 @@
 package es.uji.ei1039.agenda.view
 
 
+import es.uji.ei1039.agenda.data.IRepository
 import es.uji.ei1039.agenda.model.Contact
 import es.uji.ei1039.agenda.model.Group
 import javafx.collections.ObservableList
@@ -27,6 +28,7 @@ class ContactEditor : View() {
 
     /** The contact to be edited. If no contact is passed, then a new contact is created. */
     val contact: Contact by param(Contact())
+    val groups: IRepository<Group> by param()
     /** The mode in which the editor is open */
     val mode: Mode = if (params.containsKey(ContactEditor::contact.name)) Mode.EDIT else Mode.CREATE
 
@@ -46,7 +48,9 @@ class ContactEditor : View() {
             em_box.children.add(TextField())
 
             contact.groupsProperty.forEach{ group -> val box = HBox(); box.add(Label(group.name));box.add(Button("X"));gp_box.children.add(box);}
-            gp_box.add(ChoiceBox<Group>())
+            val gdesp = ChoiceBox<Group>()
+            groups.getAll().forEach{ group -> if(!contact.groupsProperty.get().contains(group)){gdesp.items.add(group)}}
+            gp_box.add(gdesp)
 
         }
     }

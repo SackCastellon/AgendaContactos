@@ -2,6 +2,7 @@ package es.uji.ei1039.agenda.view
 
 import es.uji.ei1039.agenda.data.IRepository
 import es.uji.ei1039.agenda.model.Contact
+import es.uji.ei1039.agenda.model.Group
 import es.uji.ei1039.agenda.util.converter.ContactStringConverter
 import javafx.beans.binding.Bindings
 import javafx.beans.property.ObjectProperty
@@ -23,6 +24,7 @@ import tornadofx.*
 class ContactOverview : Fragment() {
 
     private val contacts: IRepository<Contact> by di("contacts")
+    private val contactGroups: IRepository<Group> by di("contactGroups")
 
     override val root: BorderPane by fxml(hasControllerAttribute = true)
 
@@ -42,6 +44,8 @@ class ContactOverview : Fragment() {
 
     private val provider: ObjectProperty<IRepository<Contact>> = SimpleObjectProperty()
 
+
+
     init {
         val completionBinding: AutoCompletionBinding<Contact> = TextFields.bindAutoCompletion(searchBox, this::getSuggestions, ContactStringConverter)
         completionBinding.minWidthProperty().bind(searchBox.minWidthProperty())
@@ -50,7 +54,6 @@ class ContactOverview : Fragment() {
         contactsTable.apply {
             column<Contact, String>(messages["column.name"]) { with(it.value) { Bindings.format("%s %s", nameProperty, surnameProperty) } }
         }
-
         editContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
         deleteContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
         showContactDetails(null)
@@ -99,7 +102,7 @@ class ContactOverview : Fragment() {
             return
         }
 
-        val editor = find<ContactEditor>(ContactEditor::contact to selectedContact)
+        val editor = find<ContactEditor>(ContactEditor::contact to selectedContact, ContactEditor::groups to contactGroups)
             .also { it.openModal(escapeClosesWindow = false, resizable = false, block = true) }
 
         if (editor.success) contacts.add(editor.contact)
