@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.Button
+import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
@@ -33,6 +34,12 @@ class ContactOverview : Fragment() {
     private val deleteContact: Button by fxid()
     private val searchBox: TextField by fxid()
 
+    private val fn_l: Label by fxid()
+    private val ln_l: Label by fxid()
+    private val ph_l: Label by fxid()
+    private val gp_l: Label by fxid()
+    private val em_l: Label by fxid()
+
     private val provider: ObjectProperty<IRepository<Contact>> = SimpleObjectProperty()
 
     init {
@@ -46,11 +53,30 @@ class ContactOverview : Fragment() {
 
         editContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
         deleteContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
+        showContactDetails(null)
+        contactsTable.selectionModel.selectedItemProperty().addListener { _, _, newValue -> showContactDetails(newValue) }
     }
 
     private fun search(contact : Contact) {
 
 
+    }
+
+    private fun showContactDetails(person: Contact?) {
+        if (person != null) {
+            fn_l.text = person.name
+            ln_l.text = person.surname
+            ph_l.text = person.phonesProperty.toString()
+            gp_l.text = person.groupsProperty.toString()
+            em_l.text = person.emailsProperty.toString()
+
+        } else {
+            fn_l.text = ""
+            ln_l.text = ""
+            ph_l.text = ""
+            gp_l.text = ""
+            em_l.text = ""
+        }
     }
 
     private fun getSuggestions( suggestionRequest : AutoCompletionBinding.ISuggestionRequest): List<Contact> {

@@ -59,9 +59,6 @@
                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                      </rowConstraints>
                                      <padding>
                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -69,19 +66,14 @@
                               <children>
                                  <Label text="First name:" />
                                  <Label text="Last name:" GridPane.rowIndex="1" />
-                                 <Label text="Street:" GridPane.rowIndex="2" />
-                                 <Label text="City:" GridPane.rowIndex="3" />
-                                 <Label text="Postal Code" GridPane.rowIndex="4" />
-                                 <Label text="Birthday" GridPane.rowIndex="5" />
-                                 <Label text="Groups" GridPane.rowIndex="6" />
-                                 <Label text="Favourite" GridPane.rowIndex="7" />
+                                 <Label text="Groups" GridPane.rowIndex="4" />
                                  <Label fx:id="fn_l" text="Label" GridPane.columnIndex="1" />
                                  <Label fx:id="ln_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                 <Label fx:id="st_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                 <Label fx:id="cy_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                 <Label fx:id="pc_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                                 <Label fx:id="bd_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                                 <Label fx:id="gp_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                 <Label fx:id="gp_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                 <Label text="Phones:" GridPane.rowIndex="2" />
+                                 <Label fx:id="ph_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                 <Label text="Emails:" GridPane.rowIndex="3" />
+                                 <Label fx:id="em_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                               </children>
                                  </GridPane>
                         </children>

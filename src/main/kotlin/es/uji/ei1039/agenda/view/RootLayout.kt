@@ -32,6 +32,7 @@ class RootLayout : View() {
         // TODO
     }
 
+
     @FXML
     private fun handleQuit(event: ActionEvent) {
         Platform.exit()
