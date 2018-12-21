@@ -2,10 +2,10 @@
 
 <!--suppress JavaFxUnresolvedFxIdReference -->
 
-<?import javafx.geometry.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="es.uji.ei1039.agenda.view.ContactOverview">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="es.uji.ei1039.agenda.view.ContactOverview">
     <center>
         <SplitPane dividerPositions="0.5" BorderPane.alignment="CENTER">
             <TableView fx:id="contactsTable">
@@ -16,37 +16,10 @@
             <BorderPane SplitPane.resizableWithParent="false">
                 <center>
                     <ScrollPane fitToWidth="true" vbarPolicy="ALWAYS">
-                        <VBox spacing="7.0">
+                        <VBox fx:id="contactDetails" alignment="TOP_CENTER" spacing="7.0">
                             <padding>
                                 <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
                             </padding>
-                            <Label text="Person Details: "/>
-                            <GridPane fx:id="detailsPane" hgap="7.0" vgap="7.0">
-                                <columnConstraints>
-                                    <ColumnConstraints prefWidth="80.0"/>
-                                    <ColumnConstraints/>
-                                </columnConstraints>
-                                <rowConstraints>
-                                    <RowConstraints/>
-                                    <RowConstraints/>
-                                    <RowConstraints/>
-                                    <RowConstraints/>
-                                    <RowConstraints/>
-                                </rowConstraints>
-                                <padding>
-                                    <Insets bottom="7.0" left="7.0" right="7.0" top="7.0"/>
-                                </padding>
-                                <Label text="First name:"/>
-                                <Label text="Last name:" GridPane.rowIndex="1"/>
-                                <Label text="Groups" GridPane.rowIndex="4"/>
-                                <Label fx:id="fn_l" text="Label" GridPane.columnIndex="1"/>
-                                <Label fx:id="ln_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                                <Label fx:id="gp_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                                <Label text="Phones:" GridPane.rowIndex="2"/>
-                                <Label fx:id="ph_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                                <Label text="Emails:" GridPane.rowIndex="3"/>
-                                <Label fx:id="em_l" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                            </GridPane>
                         </VBox>
                     </ScrollPane>
                 </center>

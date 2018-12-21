@@ -40,7 +40,7 @@ dependencies {
 
     // Icons
     implementation("org.kordamp.ikonli:ikonli-javafx:$ikonliVersion")
-    implementation("org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVersion")
+    implementation("org.kordamp.ikonli:ikonli-material-pack:$ikonliVersion")
 
     // Databases
     implementation("org.jetbrains.exposed:exposed:0.11.2")

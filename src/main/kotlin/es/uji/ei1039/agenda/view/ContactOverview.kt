@@ -2,21 +2,26 @@ package es.uji.ei1039.agenda.view
 
 import es.uji.ei1039.agenda.data.dao.IDao
 import es.uji.ei1039.agenda.model.Contact
-import es.uji.ei1039.agenda.util.converter.ContactStringConverter
-import javafx.beans.binding.Bindings
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.Button
-import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.control.TextField
+import javafx.scene.image.Image
+import javafx.scene.input.Clipboard
+import javafx.scene.input.KeyCode.C
+import javafx.scene.input.KeyCodeCombination
+import javafx.scene.input.KeyCombination.CONTROL_DOWN
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.GridPane
+import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import mu.KotlinLogging
-import org.controlsfx.control.textfield.AutoCompletionBinding
 import org.controlsfx.control.textfield.AutoCompletionBinding.ISuggestionRequest
-import org.controlsfx.control.textfield.TextFields
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.material.Material
 import tornadofx.*
+import java.awt.Desktop
+import java.net.URI
 
 class ContactOverview : Fragment() {
 
@@ -24,55 +29,117 @@ class ContactOverview : Fragment() {
 
     override val root: BorderPane by fxml(hasControllerAttribute = true)
 
+    private val searchBox: TextField by fxid()
+
     private val contactsTable: TableView<Contact> by fxid()
-    private val detailsPane: GridPane by fxid()
+
+    private val contactDetails: VBox by fxid()
 
     private val newContact: Button by fxid()
     private val editContact: Button by fxid()
     private val deleteContact: Button by fxid()
-    private val searchBox: TextField by fxid()
-
-    private val fn_l: Label by fxid()
-    private val ln_l: Label by fxid()
-    private val ph_l: Label by fxid()
-    private val gp_l: Label by fxid()
-    private val em_l: Label by fxid()
 
     init {
-        val completionBinding: AutoCompletionBinding<Contact> = TextFields.bindAutoCompletion(searchBox, this::getSuggestions, ContactStringConverter)
-        completionBinding.minWidthProperty().bind(searchBox.minWidthProperty())
-        completionBinding.setOnAutoCompleted { event -> search(event.completion) }
         contactsTable.items.setAll(contacts.getAll())//FIXME
         contactsTable.apply {
-            column<Contact, String>(messages["column.name"]) { with(it.value) { Bindings.format("%s %s", nameProperty, surnameProperty) } }
+            column<Contact, String>(messages["column.name"]) { it.value.fullnameProperty }
         }
 
         editContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
         deleteContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
-        showContactDetails(null)
-        contactsTable.selectionModel.selectedItemProperty().addListener { _, _, newValue -> showContactDetails(newValue) }
-    }
 
-    private fun search(contact: Contact) {
+        contactDetails.apply {
+            val contact = contactsTable.selectionModel.selectedItemProperty()
 
+            visibleWhen(contact.isNotNull)
 
-    }
+            // Contact Image
+            imageview(contact.select(Contact::imageProperty).objectBinding { it ?: DEFAULT_IMAGE }) {
+                fitHeight = 100.0
+                fitWidth = 100.0
+                isPreserveRatio = true
+            }
 
-    private fun showContactDetails(person: Contact?) {
-        if (person != null) {
-            fn_l.text = person.name
-            ln_l.text = person.surname
-            ph_l.text = person.phonesProperty.toString()
-            gp_l.text = person.groupsProperty.toString()
-            em_l.text = person.emailsProperty.toString()
+            // Contact name
+            label(contact.select(Contact::fullnameProperty)).style { fontSize = 18.px }
 
-        } else {
-            fn_l.text = ""
-            ln_l.text = ""
-            ph_l.text = ""
-            gp_l.text = ""
-            em_l.text = ""
+            // Contact phones
+            vbox(7.0) {
+                contact.select(Contact::phonesProperty).onChange {
+                    children.clear()
+                    it?.forEach {
+                        hbox(7.0) {
+                            vbox(4.0) {
+                                label(it.labelProperty/*, converter = TODO()*/) {
+                                    // TODO Add translation support
+                                    style {
+                                        fontSize = 10.px
+                                        textFill = Color.GRAY
+                                    }
+                                }
+                                label(it.phoneProperty) {
+                                    contextmenu {
+                                        item(messages["context.copy"], KeyCodeCombination(C, CONTROL_DOWN))
+                                            .action { Clipboard.getSystemClipboard().setContent { putString(it.phone) } }
+                                    }
+                                }
+                            }
+                            spacer()
+                            button {
+                                prefHeight = 27.0
+                                prefWidth = 27.0
+                                graphic = FontIcon.of(Material.PHONE, 20)
+                                action { browse("tel:${it.phone}") }
+                            }
+                            button {
+                                prefHeight = 27.0
+                                prefWidth = 27.0
+                                graphic = FontIcon.of(Material.SMS, 20)
+                                action { browse("sms:${it.phone}") }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Contact emails
+            vbox(7.0) {
+                contact.select(Contact::emailsProperty).onChange {
+                    children.clear()
+                    it?.forEach {
+                        hbox(7.0) {
+                            vbox(4.0) {
+                                label(it.labelProperty/*, converter = TODO()*/) {
+                                    // TODO Add translation support
+                                    style {
+                                        fontSize = 10.px
+                                        textFill = Color.GRAY
+                                    }
+                                }
+                                label(it.emailProperty) {
+                                    contextmenu {
+                                        item(messages["context.copy"], KeyCodeCombination(C, CONTROL_DOWN)) {
+                                            action { Clipboard.getSystemClipboard().putString(it.email) }
+                                        }
+                                    }
+                                }
+                            }
+                            spacer()
+                            button {
+                                prefHeight = 27.0
+                                prefWidth = 27.0
+                                graphic = FontIcon.of(Material.EMAIL, 20)
+                                action { browse("mailto:${it.email}") }
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    private fun browse(uri: String) {
+        if (SUPPORTS_BROWSE) Desktop.getDesktop().browse(URI(uri))
     }
 
     private fun getSuggestions(request: ISuggestionRequest): List<Contact> {
@@ -88,7 +155,6 @@ class ContactOverview : Fragment() {
                     contact.groups.any { it.name.matches() }
         }.toList()
     }
-
 
     @FXML
     private fun handleNewContact(event: ActionEvent) {
@@ -125,5 +191,7 @@ class ContactOverview : Fragment() {
 
     companion object {
         private val logger = KotlinLogging.logger {}
+        private val DEFAULT_IMAGE by lazy { Image("/images/grey_silhouette.png") }
+        private val SUPPORTS_BROWSE = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
     }
 }

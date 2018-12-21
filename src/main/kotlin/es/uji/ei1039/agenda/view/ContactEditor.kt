@@ -28,7 +28,7 @@ class ContactEditor : View() {
     /** The contact to be edited. If no contact is passed, then a new contact is created. */
     val contact: Contact by param(Contact.New())
     /** The mode in which the editor is open */
-    val mode: Mode = if (params.containsKey(ContactEditor::contact.name)) Mode.EDIT else Mode.CREATE
+    private val mode: Mode = if (contact is Contact.New) Mode.CREATE else Mode.EDIT
 
     private val groups: IDao<Group> by di("groups")
 

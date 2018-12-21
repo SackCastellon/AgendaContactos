@@ -1,8 +1,11 @@
 package es.uji.ei1039.agenda.model
 
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringExpression
 import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.scene.image.Image
 import tornadofx.ItemViewModel
 import tornadofx.getValue
 import tornadofx.setValue
@@ -20,6 +23,12 @@ sealed class Contact(
 
     val surnameProperty: StringProperty = SimpleStringProperty(surname)
     var surname: String by surnameProperty
+
+    val fullnameProperty: StringExpression = Bindings.format("%s %s", nameProperty, surnameProperty)
+    val fullname: String by fullnameProperty
+
+    val imageProperty: ObjectProperty<Image?> = SimpleObjectProperty()
+    var image: Image? by imageProperty
 
     val phonesProperty: ListProperty<Phone> = SimpleListProperty(FXCollections.observableArrayList(phones))
     var phones: ObservableList<Phone> by phonesProperty
