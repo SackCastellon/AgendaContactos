@@ -51,11 +51,12 @@ dependencies {
     implementation("io.github.soc:directories:10")
 
     // Validation
+    implementation("commons-validator:commons-validator:1.6")
     implementation("com.googlecode.libphonenumber:libphonenumber:8.10.2")
 
     // Logging
     implementation("ch.qos.logback:logback-classic:1.3.0-alpha4")
-    implementation("io.github.microutils:kotlin-logging:1.6.10")
+    implementation("io.github.microutils:kotlin-logging:1.6.22")
 
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.2")

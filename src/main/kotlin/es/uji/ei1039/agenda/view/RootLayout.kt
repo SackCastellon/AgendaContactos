@@ -6,6 +6,7 @@ import javafx.fxml.FXML
 import javafx.scene.layout.BorderPane
 import tornadofx.View
 import tornadofx.get
+import tornadofx.runLater
 
 class RootLayout : View() {
 
@@ -15,6 +16,13 @@ class RootLayout : View() {
         title = messages["title"]
 
         root.center<ContactOverview>()
+
+        runLater {
+            currentStage?.apply {
+                minWidth = 350.0
+                minHeight = 300.0
+            }
+        }
     }
 
     @FXML

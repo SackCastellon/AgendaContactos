@@ -18,33 +18,20 @@
         </VBox>
     </top>
     <center>
-        <VBox spacing="7.0">
+        <VBox spacing="10.0">
             <padding>
                 <Insets bottom="15.0" left="20.0" right="20.0" top="15.0"/>
             </padding>
-            <GridPane hgap="7.0" vgap="7.0">
-                <columnConstraints>
-                    <ColumnConstraints halignment="RIGHT" prefWidth="75.0"/>
-                    <ColumnConstraints hgrow="SOMETIMES"/>
-                </columnConstraints>
-                <rowConstraints>
-                    <RowConstraints/>
-                    <RowConstraints/>
-                    <RowConstraints/>
-                    <RowConstraints/>
-                    <RowConstraints/>
-                </rowConstraints>
-                <Label fx:id="l_nom" text="Nombre"/>
-                <Label fx:id="l_apell" text="Apellido" GridPane.rowIndex="1"/>
-                <Label fx:id="l_tel" text="Telefonos" GridPane.rowIndex="2"/>
-                <Label text="Emails" GridPane.rowIndex="3"/>
-                <Label text="Grupos" GridPane.rowIndex="4"/>
-                <TextField fx:id="tf_nom" GridPane.columnIndex="1"/>
-                <TextField fx:id="tf_ap" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                <VBox fx:id="tel_box" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                <VBox fx:id="em_box" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                <VBox fx:id="gp_box" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-            </GridPane>
+            <VBox spacing="5.0">
+                <Label text="Name"/>
+                <VBox fillWidth="false" spacing="7.0">
+                    <HBox spacing="7.0">
+                        <TextField prefWidth="200.0" promptText="Name"/>
+                        <Button mnemonicParsing="false" text="Button"/>
+                    </HBox>
+                    <TextField/>
+                </VBox>
+            </VBox>
         </VBox>
     </center>
     <bottom>

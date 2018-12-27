@@ -2,21 +2,35 @@
 
 <!--suppress JavaFxUnresolvedFxIdReference -->
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="es.uji.ei1039.agenda.view.ContactOverview">
     <center>
         <SplitPane dividerPositions="0.5" BorderPane.alignment="CENTER">
-            <TableView fx:id="contactsTable">
-                <columnResizePolicy>
-                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                </columnResizePolicy>
-            </TableView>
+            <BorderPane>
+                <center>
+                    <TableView fx:id="contactsTable">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                    </TableView>
+                </center>
+                <bottom>
+                    <ButtonBar BorderPane.alignment="CENTER">
+                        <buttons>
+                            <Button fx:id="newContact" text="_New..."/>
+                        </buttons>
+                        <padding>
+                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                        </padding>
+                    </ButtonBar>
+                </bottom>
+            </BorderPane>
             <BorderPane SplitPane.resizableWithParent="false">
                 <center>
                     <ScrollPane fitToWidth="true" vbarPolicy="ALWAYS">
-                        <VBox fx:id="contactDetails" alignment="TOP_CENTER" spacing="7.0">
+                        <VBox fx:id="contactDetails" alignment="TOP_CENTER" spacing="10.0">
                             <padding>
                                 <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
                             </padding>
@@ -26,9 +40,8 @@
                 <bottom>
                     <ButtonBar BorderPane.alignment="CENTER">
                         <buttons>
-                            <Button fx:id="newContact" onAction="#handleNewContact" text="_New..."/>
-                            <Button fx:id="editContact" onAction="#handleEditContact" text="_Edit..."/>
-                            <Button fx:id="deleteContact" onAction="#handleDeleteContact" text="_Delete"/>
+                            <Button fx:id="editContact" text="_Edit..."/>
+                            <Button fx:id="deleteContact" text="_Delete"/>
                         </buttons>
                         <padding>
                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>

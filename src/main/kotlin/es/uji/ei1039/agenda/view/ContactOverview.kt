@@ -2,8 +2,10 @@ package es.uji.ei1039.agenda.view
 
 import es.uji.ei1039.agenda.data.dao.IDao
 import es.uji.ei1039.agenda.model.Contact
-import javafx.event.ActionEvent
-import javafx.fxml.FXML
+import es.uji.ei1039.agenda.model.Email
+import es.uji.ei1039.agenda.model.Phone
+import es.uji.ei1039.agenda.util.select
+import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.TableView
 import javafx.scene.control.TextField
@@ -40,20 +42,33 @@ class ContactOverview : Fragment() {
     private val deleteContact: Button by fxid()
 
     init {
-        contactsTable.items.setAll(contacts.getAll())//FIXME
+        // TODO Implement search functionality
+
+        contactsTable.items = contacts.observable
         contactsTable.apply {
-            column<Contact, String>(messages["column.name"]) { it.value.fullnameProperty }
+            column(messages["column.name"], Contact::fullnameProperty)
         }
 
-        editContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
-        deleteContact.enableWhen { contactsTable.selectionModel.selectedItemProperty().isNotNull }
+        val contact = contactsTable.selectionModel.selectedItemProperty()
+
+        newContact.apply {
+            action(::handleNewContact)
+        }
+
+        editContact.apply {
+            action(::handleEditContact)
+            enableWhen(contact.isNotNull)
+        }
+
+        deleteContact.apply {
+            action(::handleDeleteContact)
+            enableWhen(contact.isNotNull)
+        }
 
         contactDetails.apply {
-            val contact = contactsTable.selectionModel.selectedItemProperty()
-
             visibleWhen(contact.isNotNull)
 
-            // Contact Image
+            // Contact image
             imageview(contact.select(Contact::imageProperty).objectBinding { it ?: DEFAULT_IMAGE }) {
                 fitHeight = 100.0
                 fitWidth = 100.0
@@ -64,83 +79,68 @@ class ContactOverview : Fragment() {
             label(contact.select(Contact::fullnameProperty)).style { fontSize = 18.px }
 
             // Contact phones
-            vbox(7.0) {
-                contact.select(Contact::phonesProperty).onChange {
-                    children.clear()
-                    it?.forEach {
-                        hbox(7.0) {
-                            vbox(4.0) {
-                                label(it.labelProperty/*, converter = TODO()*/) {
-                                    // TODO Add translation support
-                                    style {
-                                        fontSize = 10.px
-                                        textFill = Color.GRAY
-                                    }
-                                }
-                                label(it.phoneProperty) {
-                                    contextmenu {
-                                        item(messages["context.copy"], KeyCodeCombination(C, CONTROL_DOWN))
-                                            .action { Clipboard.getSystemClipboard().setContent { putString(it.phone) } }
-                                    }
-                                }
-                            }
-                            spacer()
-                            button {
-                                prefHeight = 27.0
-                                prefWidth = 27.0
-                                graphic = FontIcon.of(Material.PHONE, 20)
-                                action { browse("tel:${it.phone}") }
-                            }
-                            button {
-                                prefHeight = 27.0
-                                prefWidth = 27.0
-                                graphic = FontIcon.of(Material.SMS, 20)
-                                action { browse("sms:${it.phone}") }
+            vbox(5).bindChildren(contact.select(Contact::phonesProperty)) {
+                hbox(5, Pos.CENTER_LEFT) {
+                    vbox(2) {
+                        label(it.labelProperty, converter = Phone.Label.converter) {
+                            style {
+                                fontSize = 10.px
+                                textFill = Color.GRAY
                             }
                         }
+                        label(it.phoneProperty) {
+                            contextmenu {
+                                item(messages["context.copy"], KeyCodeCombination(C, CONTROL_DOWN))
+                                    .action { Clipboard.getSystemClipboard().setContent { putString(it.phone) } }
+                            }
+                        }
+                    }
+                    spacer()
+                    button {
+                        padding = insets(4)
+                        graphic = FontIcon.of(Material.PHONE, 20)
+                        action { browse("tel:${it.phone}") }
+                    }
+                    button {
+                        padding = insets(4)
+                        graphic = FontIcon.of(Material.SMS, 20)
+                        action { browse("sms:${it.phone}") }
                     }
                 }
             }
 
             // Contact emails
-            vbox(7.0) {
-                contact.select(Contact::emailsProperty).onChange {
-                    children.clear()
-                    it?.forEach {
-                        hbox(7.0) {
-                            vbox(4.0) {
-                                label(it.labelProperty/*, converter = TODO()*/) {
-                                    // TODO Add translation support
-                                    style {
-                                        fontSize = 10.px
-                                        textFill = Color.GRAY
-                                    }
-                                }
-                                label(it.emailProperty) {
-                                    contextmenu {
-                                        item(messages["context.copy"], KeyCodeCombination(C, CONTROL_DOWN)) {
-                                            action { Clipboard.getSystemClipboard().putString(it.email) }
-                                        }
-                                    }
-                                }
+            vbox(5).bindChildren(contact.select(Contact::emailsProperty)) {
+                hbox(5, Pos.CENTER_LEFT) {
+                    vbox(2) {
+                        label(it.labelProperty, converter = Email.Label.converter) {
+                            style {
+                                fontSize = 10.px
+                                textFill = Color.GRAY
                             }
-                            spacer()
-                            button {
-                                prefHeight = 27.0
-                                prefWidth = 27.0
-                                graphic = FontIcon.of(Material.EMAIL, 20)
-                                action { browse("mailto:${it.email}") }
+                        }
+                        label(it.emailProperty) {
+                            contextmenu {
+                                item(messages["context.copy"], KeyCodeCombination(C, CONTROL_DOWN)) {
+                                    action { Clipboard.getSystemClipboard().putString(it.email) }
+                                }
                             }
                         }
                     }
+                    spacer()
+                    button {
+                        padding = insets(4)
+                        graphic = FontIcon.of(Material.EMAIL, 20)
+                        action { browse("mailto:${it.email}") }
+                    }
                 }
             }
+
+            // TODO Contact groups
         }
     }
 
-    private fun browse(uri: String) {
-        if (SUPPORTS_BROWSE) Desktop.getDesktop().browse(URI(uri))
-    }
+    private fun browse(uri: String): Unit = if (SUPPORTS_BROWSE) Desktop.getDesktop().browse(URI(uri)) else Unit
 
     private fun getSuggestions(request: ISuggestionRequest): List<Contact> {
         val query = request.userText
@@ -148,22 +148,22 @@ class ContactOverview : Fragment() {
         fun String.matches(): Boolean = contains(query, true)
 
         return contacts.getAll().asSequence().filter { contact ->
-            contact.name.matches() ||
-                    contact.surname.matches() ||
+            contact.firstName.matches() ||
+                    contact.lastName.matches() ||
                     contact.phones.any { it.phone.matches() } ||
                     contact.emails.any { it.email.matches() } ||
                     contact.groups.any { it.name.matches() }
         }.toList()
     }
 
-    @FXML
-    private fun handleNewContact(event: ActionEvent) {
-        val editor = find<ContactEditor>().also { it.openModal(escapeClosesWindow = false, resizable = false, block = true) }
+    private fun handleNewContact() {
+        val editor = find<ContactEditor>().also {
+            it.openModal(escapeClosesWindow = false, /*resizable = false,*/ block = true)
+        }
         if (editor.success) contacts.add(editor.contact)
     }
 
-    @FXML
-    private fun handleEditContact(event: ActionEvent) {
+    private fun handleEditContact() {
         val selectedContact = contactsTable.selectedItem
 
         if (selectedContact == null) {
@@ -171,14 +171,13 @@ class ContactOverview : Fragment() {
             return
         }
 
-        val editor = find<ContactEditor>(ContactEditor::contact to selectedContact)
-            .also { it.openModal(escapeClosesWindow = false, resizable = false, block = true) }
-
+        val editor = find<ContactEditor>(ContactEditor::contact to selectedContact).also {
+            it.openModal(escapeClosesWindow = false, /*resizable = false,*/ block = true)
+        }
         if (editor.success) contacts.add(editor.contact)
     }
 
-    @FXML
-    private fun handleDeleteContact(event: ActionEvent) {
+    private fun handleDeleteContact() {
         val selectedContact = contactsTable.selectedItem
 
         if (selectedContact == null) {
@@ -192,6 +191,6 @@ class ContactOverview : Fragment() {
     companion object {
         private val logger = KotlinLogging.logger {}
         private val DEFAULT_IMAGE by lazy { Image("/images/grey_silhouette.png") }
-        private val SUPPORTS_BROWSE = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
+        private val SUPPORTS_BROWSE by lazy { Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE) }
     }
 }

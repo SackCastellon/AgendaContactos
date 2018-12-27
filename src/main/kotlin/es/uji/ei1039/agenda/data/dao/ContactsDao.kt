@@ -6,47 +6,79 @@ import es.uji.ei1039.agenda.model.Contact
 import es.uji.ei1039.agenda.model.Email
 import es.uji.ei1039.agenda.model.Group
 import es.uji.ei1039.agenda.model.Phone
+import javafx.beans.binding.ListBinding
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import org.jetbrains.exposed.sql.*
+import org.koin.standalone.KoinComponent
+import org.koin.standalone.inject
+import tornadofx.observable
 
-object ContactsDao : IDao<Contact> {
+object ContactsDao : IDao<Contact>, KoinComponent {
 
-    override fun add(item: Contact): Int {
-        require(item is Contact.New)
-        return dbQuery {
-            val id = Contacts.insert {
-                it[name] = item.name
-                it[surname] = item.surname
-            }.generatedKey as Int
+    private val phonesDao: IDao<Phone> by inject("phones")
+    private val emailsDao: IDao<Email> by inject("emails")
 
-            ContactPhones.batchInsert(item.phones) { phone ->
-                let {
-                    with(ContactPhones) {
-                        it[contactId] = id
-                        it[phoneId] = phone.id
-                    }
-                }
-            }
-
-            ContactEmails.batchInsert(item.emails) { email ->
-                let {
-                    with(ContactEmails) {
-                        it[contactId] = id
-                        it[emailId] = email.id
-                    }
-                }
-            }
-
-            ContactGroups.batchInsert(item.groups) { group ->
-                let {
-                    with(ContactGroups) {
-                        it[contactId] = id
-                        it[groupId] = group.id
-                    }
-                }
-            }
-
-            id
+    private val contacts by lazy {
+        object : ListBinding<Contact>() {
+            override fun computeValue(): ObservableList<Contact> = getAll().observable()
         }
+    }
+
+    override val observable: ObservableList<Contact>
+        get() = FXCollections.unmodifiableObservableList(contacts)
+
+    override fun add(item: Contact): Contact {
+        val id = if (item.isNew) {
+
+            val newPhones = phonesDao.addAll(item.phones)
+            val newEmails = emailsDao.addAll(item.emails)
+
+            dbQuery {
+                val id = Contacts.insert {
+                    it[firstName] = item.firstName
+                    it[lastName] = item.lastName
+                }.generatedKey as Int
+
+                ContactPhones.batchInsert(newPhones) { phone ->
+                    let {
+                        with(ContactPhones) {
+                            it[contactId] = id
+                            it[phoneId] = phone.id
+                        }
+                    }
+                }
+
+                ContactEmails.batchInsert(newEmails) { email ->
+                    let {
+                        with(ContactEmails) {
+                            it[contactId] = id
+                            it[emailId] = email.id
+                        }
+                    }
+                }
+
+                ContactGroups.batchInsert(item.groups) { group ->
+                    let {
+                        with(ContactGroups) {
+                            it[contactId] = id
+                            it[groupId] = group.id
+                        }
+                    }
+                }
+
+                id
+            }
+        } else dbQuery {
+            Contacts.update({ Contacts.id eq item.id }) {
+                it[firstName] = item.firstName
+                it[lastName] = item.lastName
+            }
+
+            item.id
+        }
+        contacts.invalidate()
+        return get(id) ?: throw NoSuchElementException("Cannot find email with id: $id")
     }
 
     override fun get(id: Int): Contact? {
@@ -81,13 +113,14 @@ object ContactsDao : IDao<Contact> {
         dbQuery {
             Contacts.deleteWhere { Contacts.id eq id }
         }
+        contacts.invalidate()
     }
 }
 
-private fun ResultRow.toContact(phones: List<Phone>, emails: List<Email>, groups: List<Group>): Contact = Contact.Existing(
+private fun ResultRow.toContact(phones: List<Phone>, emails: List<Email>, groups: List<Group>): Contact = Contact.create(
     id = this[Contacts.id],
-    name = this[Contacts.name],
-    surname = this[Contacts.surname],
+    firstName = this[Contacts.firstName],
+    lastName = this[Contacts.lastName],
     phones = phones,
     emails = emails,
     groups = groups

@@ -16,7 +16,10 @@ object DatabaseManager {
     private val db: Database by lazy { Database.connect(dataSource()) }
 
     private fun dataSource(): DataSource {
-        return SQLiteDataSource().apply { url = JDBC.PREFIX + Directories.databaseFile }
+        return SQLiteDataSource().apply {
+            url = JDBC.PREFIX + Directories.databaseFile
+            setEnforceForeignKeys(true)
+        }
     }
 
     internal fun <T> dbQuery(query: Transaction.() -> T): T = transaction(Connection.TRANSACTION_SERIALIZABLE, 2, db, query)

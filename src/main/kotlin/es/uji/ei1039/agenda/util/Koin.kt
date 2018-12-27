@@ -1,10 +1,10 @@
 package es.uji.ei1039.agenda.util
 
-import es.uji.ei1039.agenda.data.dao.ContactsDao
-import es.uji.ei1039.agenda.data.dao.GroupsDao
-import es.uji.ei1039.agenda.data.dao.IDao
+import es.uji.ei1039.agenda.data.dao.*
 import es.uji.ei1039.agenda.model.Contact
+import es.uji.ei1039.agenda.model.Email
 import es.uji.ei1039.agenda.model.Group
+import es.uji.ei1039.agenda.model.Phone
 import org.koin.dsl.module.module
 import org.koin.log.Logger.SLF4JLogger
 import org.koin.standalone.StandAloneContext.startKoin
@@ -20,5 +20,7 @@ object KoinContainer : DIContainer {
 
 private val koinModule = module {
     single<IDao<Contact>>("contacts") { ContactsDao }
+    single<IDao<Phone>>("phones") { PhonesDao }
+    single<IDao<Email>>("emails") { EmailsDao }
     single<IDao<Group>>("groups") { GroupsDao }
 }

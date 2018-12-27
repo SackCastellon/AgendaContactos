@@ -1,69 +1,236 @@
 package es.uji.ei1039.agenda.view
 
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import es.uji.ei1039.agenda.data.dao.IDao
 import es.uji.ei1039.agenda.model.Contact
+import es.uji.ei1039.agenda.model.Email
 import es.uji.ei1039.agenda.model.Group
-import javafx.scene.control.Button
+import es.uji.ei1039.agenda.model.Phone
+import es.uji.ei1039.agenda.view.styles.EditorStyles
+import javafx.geometry.Pos
+import javafx.scene.control.ButtonBar
 import javafx.scene.control.ChoiceBox
-import javafx.scene.control.Label
+import javafx.scene.control.ScrollPane
 import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.HBox
-import javafx.scene.layout.VBox
-import tornadofx.View
-import tornadofx.get
+import javafx.scene.layout.Priority
+import org.apache.commons.validator.routines.EmailValidator
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.material.Material
+import tornadofx.*
+import tornadofx.ValidationTrigger.OnChange
 
-class ContactEditor : View() {
 
-    override val root: BorderPane by fxml(hasControllerAttribute = true)
-
-    private val tf_nom: TextField by fxid()
-    private val tf_ap: TextField by fxid()
-    private val l_tit: Label by fxid()
-    private val tel_box: VBox by fxid()
-    private val em_box: VBox by fxid()
-    private val gp_box: VBox by fxid()
-
-    /** The contact to be edited. If no contact is passed, then a new contact is created. */
-    val contact: Contact by param(Contact.New())
-    /** The mode in which the editor is open */
-    private val mode: Mode = if (contact is Contact.New) Mode.CREATE else Mode.EDIT
+class ContactEditor : Fragment() {
 
     private val groups: IDao<Group> by di("groups")
 
+    private val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
+    private val emailValidator: EmailValidator = EmailValidator.getInstance()
+
+    /** The contact to be edited. If no contact is passed, then a empty contact is created. */
+    val contact: Contact by param(Contact.empty())
+
+    private val model = Contact.ViewModel(contact)
+
+    /** The mode in which the editor is open */
+    private val mode = if (contact.isNew) Mode.CREATE else Mode.EDIT
+
+    private var _success = false
     /** Whether the contact was edited successfully (save button is pressed). */
-    var success: Boolean = false // TODO Set to true if the contact is edited successfully
-        private set
+    val success: Boolean get() = _success
+
+    override val root: BorderPane = borderpane {
+        addClass(EditorStyles.editor)
+        top {
+            hbox {
+                addClass(EditorStyles.header)
+                vbox(5) {
+                    label(messages["title"])
+                    label(messages["heading.${mode.name.toLowerCase()}"]) {
+                        addClass(EditorStyles.heading)
+                    }
+                }
+            }
+        }
+        center {
+            scrollpane(fitToWidth = true) {
+                vbarPolicy = ScrollPane.ScrollBarPolicy.ALWAYS
+                prefHeight = 350.0
+
+                vbox(7) {
+                    addClass(EditorStyles.content)
+                    prefWidth = 300.0
+
+                    // TODO Contact image
+
+                    // Contact name
+                    vbox(5) {
+                        label(messages["field.name"]).addClass(EditorStyles.fieldset)
+                        textfield(model.firstName) {
+                            promptText = messages["field.name.first"]
+                            required(message = messages["error.field.blank"])
+                        }
+                        textfield(model.lastName) {
+                            promptText = messages["field.name.last"]
+                        }
+                    }
+
+                    // Contact phones
+                    vbox(5) {
+                        hbox(5, Pos.BOTTOM_LEFT) {
+                            label(messages["field.phones"]).addClass(EditorStyles.fieldset)
+                            spacer()
+                            button {
+                                padding = insets(4)
+                                graphic = FontIcon.of(Material.ADD, 18)
+                                action {
+                                    model.phones.apply {
+                                        val idSet = value.filter { it.isNew }.map { it.id }.toSet()
+                                        value = (value + Phone.empty(idSet)).observable() // TODO Find a better solution
+                                    }
+                                }
+                            }
+                        }
+                        vbox(5).bindChildren(model.phones) {
+                            hbox(5) {
+                                lateinit var validatorPhone: ValidationContext.Validator<String>
+                                lateinit var validatorLabel: ValidationContext.Validator<Phone.Label>
+                                textfield(it.phoneProperty) {
+                                    hgrow = Priority.ALWAYS
+                                    prefWidth = 100.0
+                                    promptText = messages["field.phone"]
+                                    validatorPhone = requireValidPhone()
+                                }
+                                choicebox(it.labelProperty, Phone.Label.values().asList()) {
+                                    converter = Phone.Label.converter
+                                    prefWidth = 85.0
+                                    validatorLabel = required()
+                                }
+                                button {
+                                    padding = insets(4)
+                                    graphic = FontIcon.of(Material.REMOVE, 18)
+                                    action {
+                                        model.validationContext.validators.removeAll(validatorPhone, validatorLabel)
+                                        model.phones.apply {
+                                            val phone = value.first(it::equals)
+                                            value = (value - phone).observable() // TODO Find a better solution
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Contact emails
+                    vbox(5) {
+                        hbox(5, Pos.BOTTOM_LEFT) {
+                            label(messages["field.emails"]).addClass(EditorStyles.fieldset)
+                            spacer()
+                            button {
+                                padding = insets(4)
+                                graphic = FontIcon.of(Material.ADD, 18)
+                                action {
+                                    model.emails.apply {
+                                        val idSet = value.filter { it.isNew }.map { it.id }.toSet()
+                                        value = (value + Email.empty(idSet)).observable() // TODO Find a better solution
+                                    }
+                                }
+                            }
+                        }
+                        vbox(5).bindChildren(model.emails) {
+                            hbox(5) {
+                                lateinit var validatorEmail: ValidationContext.Validator<String>
+                                lateinit var validatorLabel: ValidationContext.Validator<Email.Label>
+                                textfield(it.emailProperty) {
+                                    hgrow = Priority.ALWAYS
+                                    prefWidth = 100.0
+                                    promptText = messages["field.email"]
+                                    validatorEmail = requireValidEmail()
+                                }
+                                choicebox(it.labelProperty, Email.Label.values().asList()) {
+                                    converter = Email.Label.converter
+                                    prefWidth = 85.0
+                                    validatorLabel = required()
+                                }
+                                button {
+                                    padding = insets(4)
+                                    graphic = FontIcon.of(Material.REMOVE, 18)
+                                    action {
+                                        model.validationContext.validators.removeAll(validatorEmail, validatorLabel)
+                                        model.emails.apply {
+                                            val email = value.first(it::equals)
+                                            value = (value - email).observable() // TODO Find a better solution
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // TODO Contact groups
+                }
+            }
+        }
+        bottom {
+            buttonbar {
+                addClass(EditorStyles.buttons)
+                button(messages["button.cancel"], ButtonBar.ButtonData.CANCEL_CLOSE) {
+                    isCancelButton = true
+                    action { close() }
+                }
+                button(messages["button.save"], ButtonBar.ButtonData.OK_DONE) {
+                    isDefaultButton = true
+                    action {
+                        model.commit {
+                            _success = true
+                            close()
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     init {
         title = messages["title"]
-        l_tit.text = messages["title"]
 
-        val gdesp = ChoiceBox<Group>()
-        if (mode == Mode.EDIT) {
-            tf_nom.text = contact.name
-            tf_ap.text = contact.surname
-            contact.phonesProperty.forEach { phone -> tel_box.children.add(TextField(phone.phone)) }
-
-            contact.emailsProperty.forEach { email -> em_box.children.add(TextField(email.email)) }
-
-            contact.groupsProperty.forEach { group -> val box = HBox(); box.add(Label(group.name));box.add(Button("X"));gp_box.children.add(box); }
-
-            groups.getAll().forEach { group ->
-                if (!contact.groupsProperty.get().contains(group)) {
-                    gdesp.items.add(group)
-                }
+        runLater {
+            currentStage?.apply {
+                minWidth = 215.0
+                minHeight = 350.0
             }
-            contact.groupsProperty.forEach { group -> val box = HBox(); box.add(Label(group.name));box.add(Button("X"));gp_box.children.add(box); }
-            gp_box.add(ChoiceBox<Group>())
-
-        } else{
-            gdesp.items.addAll(groups.getAll())
         }
-        tel_box.children.add(TextField())
-        em_box.children.add(TextField())
-        gp_box.add(gdesp)
+    }
+
+    private fun TextField.requireValidPhone(): ValidationContext.Validator<String> {
+        return model.validationContext.addValidator(this, textProperty(), OnChange()) {
+            when {
+                it.isNullOrBlank() -> error(messages["error.field.blank"])
+                !phoneUtil.runCatching { isValidNumber(parse(it, "ES")) }.getOrDefault(false) -> error(messages["error.field.invalidPhone"])
+                else -> null
+            }
+        }
+    }
+
+    private fun TextField.requireValidEmail(): ValidationContext.Validator<String> {
+        return model.validationContext.addValidator(this, textProperty(), OnChange()) {
+            when {
+                it.isNullOrBlank() -> error(messages["error.field.blank"])
+                !emailValidator.isValid(it) -> error(messages["error.field.invalidEmail"])
+                else -> null
+            }
+        }
+    }
+
+    private inline fun <reified T : Any> ChoiceBox<T>.required(): ValidationContext.Validator<T> {
+        return model.validationContext.addValidator(this, valueProperty(), OnChange()) {
+            when (it) {
+                null -> error(messages["error.field.empty"])
+                else -> null
+            }
+        }
     }
 
     enum class Mode { CREATE, EDIT }

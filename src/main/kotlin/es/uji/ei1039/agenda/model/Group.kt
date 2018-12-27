@@ -11,11 +11,38 @@ sealed class Group(
     val id: Int,
     name: String = ""
 ) {
+    val isNew: Boolean by lazy { this is Group.New }
+
     val nameProperty: StringProperty = SimpleStringProperty(name)
     var name: String by nameProperty
 
-    class New : Group(-1)
-    class Existing(
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Group) return false
+
+        if (id != other.id) return false
+        if (name != other.name) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id
+        result = 31 * result + name.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "Group(id=$id, firstName=$name)"
+    }
+
+    companion object {
+        fun empty(): Group = Group.New()
+        fun create(id: Int, name: String): Group = Group.Existing(id, name)
+    }
+
+    private class New : Group(-1)
+    private class Existing(
         id: Int,
         name: String
     ) : Group(id, name)
