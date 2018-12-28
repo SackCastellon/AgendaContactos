@@ -10,7 +10,8 @@ sealed class Email(
     email: String = "",
     label: Label? = null
 ) {
-    val isNew: Boolean by lazy { this is New }
+    @Suppress("LeakingThis")
+    val isNew: Boolean = this is New
 
     val emailProperty: StringProperty = SimpleStringProperty(email)
     var email: String by emailProperty
@@ -67,8 +68,7 @@ sealed class Email(
         WORK;
 
         companion object {
-            val converter: StringConverter<Label> =
-                StringConverter { FX.messages["email.label.${it.name.toLowerCase()}"] }
+            val converter: StringConverter<Label> = StringConverter { FX.messages["email.label.${it.name.toLowerCase()}"] }
         }
     }
 

@@ -32,7 +32,7 @@ dependencies {
     implementation("com.google.guava:guava:27.0.1-jre")
 
     // User Interface
-    implementation("no.tornado:tornadofx:1.7.18-SNAPSHOT")
+    implementation("no.tornado:tornadofx:1.7.18")
     implementation("no.tornado:tornadofx-controlsfx:0.1.1")
     implementation("org.controlsfx:controlsfx:8.40.14")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.11")

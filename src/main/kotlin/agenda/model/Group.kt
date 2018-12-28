@@ -11,7 +11,8 @@ sealed class Group(
     val id: Int,
     name: String = ""
 ) {
-    val isNew: Boolean by lazy { this is New }
+    @Suppress("LeakingThis")
+    val isNew: Boolean = this is New
 
     val nameProperty: StringProperty = SimpleStringProperty(name)
     var name: String by nameProperty
@@ -38,14 +39,24 @@ sealed class Group(
 
     companion object {
         fun empty(): Group = New()
+        fun empty(idBlacklist: Set<Int>): Group = New((-1 downTo Int.MIN_VALUE).first { it !in idBlacklist })
         fun create(id: Int, name: String): Group = Existing(id, name)
     }
 
-    private class New : Group(-1)
+    private class New(id: Int = -1) : Group(id) {
+        init {
+            require(id < 0) { "Id of new phone must be negative" }
+        }
+    }
+
     private class Existing(
         id: Int,
         name: String
-    ) : Group(id, name)
+    ) : Group(id, name) {
+        init {
+            require(id >= 0) { "Id of existing phone must be positive" }
+        }
+    }
 
     class ViewModel(group: Group) : ItemViewModel<Group>(group) {
         val name: Property<String> = bind(Group::nameProperty)

@@ -14,9 +14,9 @@ class Agenda : App(RootLayout::class, EditorStyles::class) {
         FX.dicontainer = KoinContainer
 
         // Initialize directories
-        Directories
+        Directories.create()
         // Initialize database manager
-        DatabaseManager
+        DatabaseManager.setup()
     }
 }
 

@@ -18,7 +18,8 @@ sealed class Contact(
     emails: List<Email> = emptyList(),
     groups: List<Group> = emptyList()
 ) {
-    val isNew: Boolean by lazy { this is New }
+    @Suppress("LeakingThis")
+    val isNew: Boolean = this is New
 
     val imageProperty: ObjectProperty<Image?> = SimpleObjectProperty() // TODO
     var image: Image? by imageProperty

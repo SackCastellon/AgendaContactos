@@ -24,7 +24,7 @@ object DatabaseManager {
 
     internal fun <T> dbQuery(query: Transaction.() -> T): T = transaction(Connection.TRANSACTION_SERIALIZABLE, 2, db, query)
 
-    init {
+    fun setup() {
         dbQuery {
             create(
                 Phones,

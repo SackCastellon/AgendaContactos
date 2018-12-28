@@ -1,6 +1,5 @@
 package agenda.model
 
-import agenda.model.Email
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

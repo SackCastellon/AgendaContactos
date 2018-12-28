@@ -10,7 +10,8 @@ sealed class Phone(
     phone: String = "",
     label: Label? = null
 ) {
-    val isNew: Boolean by lazy { this is New }
+    @Suppress("LeakingThis")
+    val isNew: Boolean = this is New
 
     val phoneProperty: StringProperty = SimpleStringProperty(phone)
     var phone: String by phoneProperty
@@ -68,8 +69,7 @@ sealed class Phone(
         MOBILE;
 
         companion object {
-            val converter: StringConverter<Label> =
-                StringConverter { FX.messages["phone.label.${it.name.toLowerCase()}"] }
+            val converter: StringConverter<Label> = StringConverter { FX.messages["phone.label.${it.name.toLowerCase()}"] }
         }
     }
 

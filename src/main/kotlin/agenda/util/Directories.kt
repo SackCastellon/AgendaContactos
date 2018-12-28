@@ -9,7 +9,7 @@ import java.nio.file.Paths
 object Directories {
     private val logger = KotlinLogging.logger {}
 
-    private val root: Path = Paths.get(BaseDirectories.get().dataLocalDir, "AgendaUJI")
+    private val root: Path = Paths.get(BaseDirectories.get().dataLocalDir, "UJI", "Agenda")
 
     private val data: Path = root / "data"
     private val cache: Path = root / "cache"
@@ -19,9 +19,14 @@ object Directories {
     val configFile: Path = config / "configuration.json"
     val lockFile: Path = cache / ".lock"
 
+    init {
+        logger.debug { "Root directory: $root" }
+    }
+
     fun create() {
         listOf(data, cache, config)
             .filter { Files.notExists(it) }
+            .also { if (it.isNotEmpty()) logger.debug { "Creating sub-directories:" } }
             .forEach { dir ->
                 kotlin.runCatching { Files.createDirectories(dir) }.fold(
                     onSuccess = { logger.debug { " [OK]  $dir" } },
