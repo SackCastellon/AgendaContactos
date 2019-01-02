@@ -1,7 +1,5 @@
 package agenda.view
 
-
-import agenda.data.dao.IDao
 import agenda.model.Contact
 import agenda.model.Email
 import agenda.model.Group
@@ -13,6 +11,7 @@ import javafx.scene.control.ButtonBar
 import javafx.scene.control.ChoiceBox
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.TextField
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import org.apache.commons.validator.routines.EmailValidator
@@ -21,10 +20,7 @@ import org.kordamp.ikonli.material.Material
 import tornadofx.*
 import tornadofx.ValidationTrigger.OnChange
 
-
 class ContactEditor : Fragment() {
-
-    private val groups: IDao<Group> by di("groups")
 
     private val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
     private val emailValidator: EmailValidator = EmailValidator.getInstance()
@@ -169,7 +165,15 @@ class ContactEditor : Fragment() {
                         }
                     }
 
-                    // TODO Contact groups
+                    // Contact groups
+                    vbox(5) {
+                        label(messages["field.groups"]).addClass(EditorStyles.fieldset)
+                        textfield(model.groups.stringBinding { it?.joinToString(transform = Group::name).orEmpty() }) {
+                            isEditable = false
+                            setOnKeyPressed { if (it.code == KeyCode.SPACE || it.code == KeyCode.ENTER) openGroupSelector() }
+                            setOnMouseClicked { openGroupSelector() }
+                        }
+                    }
                 }
             }
         }
@@ -198,7 +202,7 @@ class ContactEditor : Fragment() {
 
         runLater {
             currentStage?.apply {
-                minWidth = 215.0
+                minWidth = 225.0
                 minHeight = 350.0
             }
         }
@@ -230,6 +234,14 @@ class ContactEditor : Fragment() {
                 null -> error(messages["error.field.empty"])
                 else -> null
             }
+        }
+    }
+
+    private fun openGroupSelector() {
+        find<GroupSelector> {
+            groupsList.bindContentBidirectional(model.groups)
+            openModal(block = true, resizable = false)
+            groupsList.unbindContentBidirectional(model.groups)
         }
     }
 

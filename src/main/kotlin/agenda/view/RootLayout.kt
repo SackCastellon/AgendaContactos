@@ -19,7 +19,7 @@ class RootLayout : View() {
 
         runLater {
             currentStage?.apply {
-                minWidth = 350.0
+                minWidth = 425.0
                 minHeight = 300.0
             }
         }

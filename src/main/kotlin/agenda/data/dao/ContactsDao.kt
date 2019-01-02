@@ -19,14 +19,11 @@ object ContactsDao : IDao<Contact>, KoinComponent {
     private val phonesDao: IDao<Phone> by inject("phones")
     private val emailsDao: IDao<Email> by inject("emails")
 
-    private val contacts by lazy {
-        object : ListBinding<Contact>() {
-            override fun computeValue(): ObservableList<Contact> = getAll().observable()
-        }
+    private val listBinding = object : ListBinding<Contact>() {
+        override fun computeValue(): ObservableList<Contact> = getAll().observable()
     }
 
-    override val observable: ObservableList<Contact>
-        get() = FXCollections.unmodifiableObservableList(contacts)
+    override val observable: ObservableList<Contact> = FXCollections.unmodifiableObservableList(listBinding)
 
     override fun add(item: Contact): Contact {
         val id = if (item.isNew) {
@@ -77,7 +74,7 @@ object ContactsDao : IDao<Contact>, KoinComponent {
 
             item.id
         }
-        contacts.invalidate()
+        listBinding.invalidate()
         return get(id) ?: throw NoSuchElementException("Cannot find email with id: $id")
     }
 
@@ -99,7 +96,7 @@ object ContactsDao : IDao<Contact>, KoinComponent {
             val emails = Emails.innerJoin(ContactEmails).selectAll()
                 .groupBy { it[ContactEmails.contactId] }.mapValues { (_, v) -> v.map { it.toEmail() } }
             val groups = Groups.innerJoin(ContactGroups).selectAll()
-                .groupBy { it[ContactPhones.contactId] }.mapValues { (_, v) -> v.map { it.toGroup() } }
+                .groupBy { it[ContactGroups.contactId] }.mapValues { (_, v) -> v.map { it.toGroup() } }
 
             Contacts.selectAll().map {
                 val id = it[Contacts.id]
@@ -113,7 +110,7 @@ object ContactsDao : IDao<Contact>, KoinComponent {
         dbQuery {
             Contacts.deleteWhere { Contacts.id eq id }
         }
-        contacts.invalidate()
+        listBinding.invalidate()
     }
 }
 

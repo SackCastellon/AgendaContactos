@@ -3,6 +3,7 @@ package agenda.view
 import agenda.data.dao.IDao
 import agenda.model.Contact
 import agenda.model.Email
+import agenda.model.Group
 import agenda.model.Phone
 import agenda.util.select
 import javafx.geometry.Pos
@@ -11,9 +12,6 @@ import javafx.scene.control.TableView
 import javafx.scene.control.TextField
 import javafx.scene.image.Image
 import javafx.scene.input.Clipboard
-import javafx.scene.input.KeyCode.C
-import javafx.scene.input.KeyCodeCombination
-import javafx.scene.input.KeyCombination.CONTROL_DOWN
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
@@ -37,6 +35,7 @@ class ContactOverview : Fragment() {
 
     private val contactDetails: VBox by fxid()
 
+    private val groups: Button by fxid()
     private val newContact: Button by fxid()
     private val editContact: Button by fxid()
     private val deleteContact: Button by fxid()
@@ -44,12 +43,17 @@ class ContactOverview : Fragment() {
     init {
         // TODO Implement search functionality
 
-        contactsTable.items = contacts.observable
         contactsTable.apply {
-            column(messages["column.name"], Contact::fullnameProperty)
+            column(messages["column.contacts"], Contact::fullnameProperty)
         }
 
-        val contact = contactsTable.selectionModel.selectedItemProperty()
+        val contactsList = SortedFilteredList(contacts.observable).bindTo(contactsTable)
+
+        val selectedContact = contactsTable.selectionModel.selectedItemProperty()
+
+        groups.apply {
+            action(::handleGroups)
+        }
 
         newContact.apply {
             action(::handleNewContact)
@@ -57,29 +61,29 @@ class ContactOverview : Fragment() {
 
         editContact.apply {
             action(::handleEditContact)
-            enableWhen(contact.isNotNull)
+            enableWhen(selectedContact.isNotNull)
         }
 
         deleteContact.apply {
             action(::handleDeleteContact)
-            enableWhen(contact.isNotNull)
+            enableWhen(selectedContact.isNotNull)
         }
 
         contactDetails.apply {
-            visibleWhen(contact.isNotNull)
+            removeWhen(selectedContact.isNull)
 
             // Contact image
-            imageview(contact.select(Contact::imageProperty).objectBinding { it ?: DEFAULT_IMAGE }) {
+            imageview(selectedContact.select(Contact::imageProperty).objectBinding { it ?: DEFAULT_IMAGE }) {
                 fitHeight = 100.0
                 fitWidth = 100.0
                 isPreserveRatio = true
             }
 
             // Contact name
-            label(contact.select(Contact::fullnameProperty)).style { fontSize = 18.px }
+            label(selectedContact.select(Contact::fullnameProperty)).style { fontSize = 18.px }
 
             // Contact phones
-            vbox(5).bindChildren(contact.select(Contact::phonesProperty)) {
+            vbox(5).bindChildren(selectedContact.select(Contact::phonesProperty)) {
                 hbox(5, Pos.CENTER_LEFT) {
                     vbox(2) {
                         label(it.labelProperty, converter = Phone.Label.converter) {
@@ -90,7 +94,7 @@ class ContactOverview : Fragment() {
                         }
                         label(it.phoneProperty) {
                             contextmenu {
-                                item(messages["context.copy"], KeyCodeCombination(C, CONTROL_DOWN))
+                                item(messages["context.copy"])
                                     .action { Clipboard.getSystemClipboard().setContent { putString(it.phone) } }
                             }
                         }
@@ -98,19 +102,19 @@ class ContactOverview : Fragment() {
                     spacer()
                     button {
                         padding = insets(4)
-                        graphic = FontIcon.of(Material.PHONE, 20)
+                        graphic = FontIcon.of(Material.PHONE, 19)
                         action { browse("tel:${it.phone}") }
                     }
                     button {
                         padding = insets(4)
-                        graphic = FontIcon.of(Material.SMS, 20)
+                        graphic = FontIcon.of(Material.SMS, 19)
                         action { browse("sms:${it.phone}") }
                     }
                 }
             }
 
             // Contact emails
-            vbox(5).bindChildren(contact.select(Contact::emailsProperty)) {
+            vbox(5).bindChildren(selectedContact.select(Contact::emailsProperty)) {
                 hbox(5, Pos.CENTER_LEFT) {
                     vbox(2) {
                         label(it.labelProperty, converter = Email.Label.converter) {
@@ -121,7 +125,7 @@ class ContactOverview : Fragment() {
                         }
                         label(it.emailProperty) {
                             contextmenu {
-                                item(messages["context.copy"], KeyCodeCombination(C, CONTROL_DOWN)) {
+                                item(messages["context.copy"]) {
                                     action { Clipboard.getSystemClipboard().putString(it.email) }
                                 }
                             }
@@ -130,13 +134,24 @@ class ContactOverview : Fragment() {
                     spacer()
                     button {
                         padding = insets(4)
-                        graphic = FontIcon.of(Material.EMAIL, 20)
+                        graphic = FontIcon.of(Material.EMAIL, 19)
                         action { browse("mailto:${it.email}") }
                     }
                 }
             }
 
-            // TODO Contact groups
+            // Contact groups
+            vbox(2) {
+                val groups = selectedContact.select(Contact::groupsProperty)
+                removeWhen { groups.booleanBinding { it.isNullOrEmpty() } }
+                label(messages["field.groups"]) {
+                    style {
+                        fontSize = 10.px
+                        textFill = Color.GRAY
+                    }
+                }
+                label(groups.stringBinding { it?.joinToString(transform = Group::name).orEmpty() })
+            }
         }
     }
 
@@ -156,10 +171,12 @@ class ContactOverview : Fragment() {
         }.toList()
     }
 
+    private fun handleGroups() {
+        find<GroupsViewer> { openModal(block = true, resizable = false) }
+    }
+
     private fun handleNewContact() {
-        val editor = find<ContactEditor>().also {
-            it.openModal(escapeClosesWindow = false, /*resizable = false,*/ block = true)
-        }
+        val editor = find<ContactEditor> { openModal(block = true) }
         if (editor.success) contacts.add(editor.contact)
     }
 
@@ -171,9 +188,7 @@ class ContactOverview : Fragment() {
             return
         }
 
-        val editor = find<ContactEditor>(ContactEditor::contact to selectedContact).also {
-            it.openModal(escapeClosesWindow = false, /*resizable = false,*/ block = true)
-        }
+        val editor = find<ContactEditor>(ContactEditor::contact to selectedContact) { openModal(block = true) }
         if (editor.success) contacts.add(editor.contact)
     }
 

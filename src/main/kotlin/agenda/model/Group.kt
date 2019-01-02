@@ -38,6 +38,9 @@ sealed class Group(
     }
 
     companion object {
+        internal val defaults = listOf("Familia", "Amigos", "Trabajo")
+
+        internal fun default(name: String): Group = New().apply { this.name = name }
         fun empty(): Group = New()
         fun empty(idBlacklist: Set<Int>): Group = New((-1 downTo Int.MIN_VALUE).first { it !in idBlacklist })
         fun create(id: Int, name: String): Group = Existing(id, name)
@@ -62,3 +65,5 @@ sealed class Group(
         val name: Property<String> = bind(Group::nameProperty)
     }
 }
+
+internal val Group.isDefault: Boolean get() = name in Group.defaults

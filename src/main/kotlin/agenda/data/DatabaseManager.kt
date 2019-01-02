@@ -1,10 +1,13 @@
 package agenda.data
 
 import agenda.data.table.*
+import agenda.model.Group
 import agenda.util.Directories
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils.create
 import org.jetbrains.exposed.sql.Transaction
+import org.jetbrains.exposed.sql.batchInsert
+import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.sqlite.JDBC
 import org.sqlite.SQLiteDataSource
@@ -22,10 +25,12 @@ object DatabaseManager {
         }
     }
 
-    internal fun <T> dbQuery(query: Transaction.() -> T): T = transaction(Connection.TRANSACTION_SERIALIZABLE, 2, db, query)
+    internal fun <T> dbQuery(query: Transaction.() -> T): T = transaction(Connection.TRANSACTION_SERIALIZABLE, 1, db, query)
 
     fun setup() {
         dbQuery {
+            val firstTime = !Groups.exists()
+
             create(
                 Phones,
                 Emails,
@@ -35,6 +40,16 @@ object DatabaseManager {
                 ContactEmails,
                 ContactGroups
             )
+
+            if (firstTime) {
+                Groups.batchInsert(Group.defaults.map { Group.default(it) }) { group ->
+                    let {
+                        with(Groups) {
+                            it[name] = group.name
+                        }
+                    }
+                }
+            }
         }
     }
 }
