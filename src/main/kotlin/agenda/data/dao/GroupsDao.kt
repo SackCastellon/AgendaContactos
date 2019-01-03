@@ -3,32 +3,24 @@ package agenda.data.dao
 import agenda.data.DatabaseManager.dbQuery
 import agenda.data.table.Groups
 import agenda.model.Group
-import javafx.beans.binding.ListBinding
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import org.jetbrains.exposed.sql.*
-import tornadofx.observable
 
-object GroupsDao : IDao<Group> {
-
-    private val listBinding = object : ListBinding<Group>() {
-        override fun computeValue(): ObservableList<Group> = getAll().observable()
-    }
-
-    override val observable: ObservableList<Group> = FXCollections.unmodifiableObservableList(listBinding)
+object GroupsDao : AbstractDao<Group>() {
 
     override fun add(item: Group): Group {
-        val id = if (item.isNew) dbQuery {
-            Groups.insert {
-                it[name] = item.name
-            }.generatedKey as Int
-        } else dbQuery {
-            Groups.update({ Groups.id eq item.id }) {
-                it[name] = item.name
+        val id = dbQuery {
+            if (item.isNew) {
+                Groups.insert {
+                    it[name] = item.name
+                }.generatedKey as Int
+            } else {
+                Groups.update({ Groups.id eq item.id }) {
+                    it[name] = item.name
+                }
+                item.id
             }
-            item.id
         }
-        listBinding.invalidate()
+        invalidate()
         return get(id) ?: throw NoSuchElementException("Cannot find group with id: $id")
     }
 
@@ -50,7 +42,7 @@ object GroupsDao : IDao<Group> {
         dbQuery {
             Groups.deleteWhere { (Groups.id eq id) and (Groups.name notInList Group.defaults) }
         }.also {
-            if (it > 0) listBinding.invalidate()
+            if (it > 0) invalidate()
         }
     }
 }

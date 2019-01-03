@@ -4,6 +4,7 @@ import javafx.collections.ObservableList
 
 interface IDao<T> {
     val observable: ObservableList<T>
+    fun invalidate()
 
     fun add(item: T): T
     @JvmDefault

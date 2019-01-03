@@ -12,12 +12,12 @@ internal object Contacts : Table() {
 
 internal object ContactPhones : Table() {
     val contactId = integer("contact_id").primaryKey().references(Contacts.id, onDelete = CASCADE, onUpdate = RESTRICT)
-    val phoneId = integer("phone_id").primaryKey().references(Phones.id, onDelete = RESTRICT, onUpdate = RESTRICT)
+    val phoneId = integer("phone_id").primaryKey().references(Phones.id, onDelete = CASCADE, onUpdate = RESTRICT)
 }
 
 internal object ContactEmails : Table() {
     val contactId = integer("contact_id").primaryKey().references(Contacts.id, onDelete = CASCADE, onUpdate = RESTRICT)
-    val emailId = integer("email_id").primaryKey().references(Emails.id, onDelete = RESTRICT, onUpdate = RESTRICT)
+    val emailId = integer("email_id").primaryKey().references(Emails.id, onDelete = CASCADE, onUpdate = RESTRICT)
 }
 
 internal object ContactGroups : Table() {

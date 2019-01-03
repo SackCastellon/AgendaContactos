@@ -3,14 +3,15 @@ package agenda.util
 import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.value.ChangeListener
+import javafx.beans.value.ObservableListValue
 import javafx.beans.value.ObservableValue
 import javafx.beans.value.WritableListValue
 import javafx.collections.ObservableList
 
-fun <T, N> ObservableValue<T>.select(nested: (T) -> ListProperty<N>): ListProperty<N> {
-    fun extractNested(): ListProperty<N>? = value?.let(nested)
+fun <T, N> ObservableValue<T>.selectList(nested: (T) -> ObservableListValue<N>): ListProperty<N> {
+    fun extractNested() = value?.let(nested)
 
-    var currentNested: ListProperty<N>? = extractNested()
+    var currentNested = extractNested()
 
     return object : SimpleListProperty<N>() {
         val changeListener = ChangeListener<Any?> { _, _, _ ->
@@ -20,7 +21,7 @@ fun <T, N> ObservableValue<T>.select(nested: (T) -> ListProperty<N>): ListProper
 
         init {
             currentNested?.addListener(changeListener)
-            this@select.addListener(changeListener)
+            this@selectList.addListener(changeListener)
         }
 
         override fun invalidated() {
@@ -32,7 +33,7 @@ fun <T, N> ObservableValue<T>.select(nested: (T) -> ListProperty<N>): ListProper
         override fun get() = currentNested?.value
 
         override fun set(v: ObservableList<N>?) {
-            (currentNested as? WritableListValue<N>)?.value = v
+            (currentNested as? WritableListValue<*>)?.value = v
             super.set(v)
         }
     }

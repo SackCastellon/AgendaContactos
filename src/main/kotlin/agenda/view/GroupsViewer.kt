@@ -10,6 +10,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.ButtonType
 import javafx.scene.control.ScrollPane
+import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
@@ -82,11 +83,12 @@ class GroupsViewer : Fragment() {
                         lateinit var btn: Button
 
                         textfield(groupModel.name) {
+                            hgrow = Priority.ALWAYS
                             promptText = messages["field.newGroup.prompt"]
                             validator {
                                 when {
                                     it.isNullOrBlank() -> error(messages["error.field.blank"])
-                                    groups.observable.any { group -> group.name == it } -> error(messages["error.field.nameAlreadyUsed"])
+                                    groups.observable.any { group -> group.name == it.trim() } -> error(messages["error.field.nameAlreadyUsed"])
                                     else -> null
                                 }
                             }
@@ -97,6 +99,7 @@ class GroupsViewer : Fragment() {
                             graphic = FontIcon.of(Material.ADD, 18)
                             tooltip(messages["tooltip.deleteGroup"])
                             action {
+                                groupModel.item.apply { name = name.trim() }
                                 groupModel.commit {
                                     groups.add(groupModel.item)
                                     groupModel.item = Group.empty()

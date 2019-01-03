@@ -10,6 +10,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.ScrollPane
+import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
@@ -63,6 +64,7 @@ class GroupSelector : Fragment() {
                         lateinit var btn: Button
 
                         textfield(groupModel.name) {
+                            hgrow = Priority.ALWAYS
                             promptText = messages["field.newGroup.prompt"]
                             validator {
                                 when {

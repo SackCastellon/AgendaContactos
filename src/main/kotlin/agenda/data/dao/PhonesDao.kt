@@ -3,42 +3,49 @@ package agenda.data.dao
 import agenda.data.DatabaseManager.dbQuery
 import agenda.data.table.Phones
 import agenda.model.Phone
-import javafx.beans.binding.ListBinding
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import org.jetbrains.exposed.sql.*
-import tornadofx.observable
 
-object PhonesDao : IDao<Phone> {
-
-    private val phones by lazy {
-        object : ListBinding<Phone>() {
-            override fun computeValue(): ObservableList<Phone> = getAll().observable()
-        }
-    }
-
-    override val observable: ObservableList<Phone>
-        get() = FXCollections.unmodifiableObservableList(phones)
+object PhonesDao : AbstractDao<Phone>() {
 
     override fun add(item: Phone): Phone {
-        val id = if (item.isNew) dbQuery {
-            Phones.insert {
-                it[phone] = item.phone
-                it[label] = item.label
-            }.generatedKey as Int
-        } else dbQuery {
-            Phones.update({ Phones.id eq item.id }) {
-                it[phone] = item.phone
-                it[label] = item.label
+        val id = dbQuery {
+            if (item.isNew) {
+                Phones.insert {
+                    it[phone] = item.phone
+                    it[label] = item.label
+                }.generatedKey as Int
+            } else {
+                Phones.update({ Phones.id eq item.id }) {
+                    it[phone] = item.phone
+                    it[label] = item.label
+                }
+                item.id
             }
-            item.id
         }
+        invalidate()
         return get(id) ?: throw NoSuchElementException("Cannot find phone with id: $id")
     }
 
-    override fun get(id: Int): Phone? = dbQuery { Phones.select { Phones.id eq id }.singleOrNull()?.toPhone() }
-    override fun getAll(): List<Phone> = dbQuery { Phones.selectAll().map { it.toPhone() } }
-    override fun remove(id: Int): Unit = dbQuery { Phones.deleteWhere { Phones.id eq id } }
+    override fun get(id: Int): Phone? {
+        require(id >= 0)
+        return dbQuery {
+            Phones.select { Phones.id eq id }.singleOrNull()?.toPhone()
+        }
+    }
+
+    override fun getAll(): List<Phone> {
+        return dbQuery {
+            Phones.selectAll().map { it.toPhone() }
+        }
+    }
+
+    override fun remove(id: Int) {
+        dbQuery {
+            Phones.deleteWhere { Phones.id eq id }
+        }.also {
+            if (it > 0) invalidate()
+        }
+    }
 }
 
 internal fun ResultRow.toPhone(): Phone = Phone.create(

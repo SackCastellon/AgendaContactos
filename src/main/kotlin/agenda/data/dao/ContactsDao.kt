@@ -6,75 +6,82 @@ import agenda.model.Contact
 import agenda.model.Email
 import agenda.model.Group
 import agenda.model.Phone
-import javafx.beans.binding.ListBinding
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import org.jetbrains.exposed.sql.*
 import org.koin.standalone.KoinComponent
 import org.koin.standalone.inject
-import tornadofx.observable
 
-object ContactsDao : IDao<Contact>, KoinComponent {
+object ContactsDao : AbstractDao<Contact>(), KoinComponent {
 
     private val phonesDao: IDao<Phone> by inject("phones")
     private val emailsDao: IDao<Email> by inject("emails")
 
-    private val listBinding = object : ListBinding<Contact>() {
-        override fun computeValue(): ObservableList<Contact> = getAll().observable()
-    }
-
-    override val observable: ObservableList<Contact> = FXCollections.unmodifiableObservableList(listBinding)
-
     override fun add(item: Contact): Contact {
-        val id = if (item.isNew) {
+        val id = dbQuery {
+            if (!item.isNew) {
+                Phones.deleteWhere {
+                    Phones.id inList ContactPhones.slice(ContactPhones.phoneId)
+                        .select { ContactPhones.contactId eq item.id }
+                        .map { it[ContactPhones.phoneId] }
+                        .minus(item.phones.map { it.id })
+                }
+                phonesDao.invalidate()
 
-            val newPhones = phonesDao.addAll(item.phones)
-            val newEmails = emailsDao.addAll(item.emails)
+                Emails.deleteWhere {
+                    Emails.id inList ContactEmails.slice(ContactEmails.emailId)
+                        .select { ContactEmails.contactId eq item.id }
+                        .map { it[ContactEmails.emailId] }
+                        .minus(item.emails.map { it.id })
+                }
+                emailsDao.invalidate()
 
-            dbQuery {
-                val id = Contacts.insert {
+                ContactGroups.deleteWhere { ContactGroups.contactId eq item.id }
+            }
+
+            val id = if (item.isNew) {
+                Contacts.insert {
                     it[firstName] = item.firstName
                     it[lastName] = item.lastName
                 }.generatedKey as Int
-
-                ContactPhones.batchInsert(newPhones) { phone ->
-                    let {
-                        with(ContactPhones) {
-                            it[contactId] = id
-                            it[phoneId] = phone.id
-                        }
-                    }
+            } else {
+                Contacts.update({ Contacts.id eq item.id }) {
+                    it[firstName] = item.firstName
+                    it[lastName] = item.lastName
                 }
-
-                ContactEmails.batchInsert(newEmails) { email ->
-                    let {
-                        with(ContactEmails) {
-                            it[contactId] = id
-                            it[emailId] = email.id
-                        }
-                    }
-                }
-
-                ContactGroups.batchInsert(item.groups) { group ->
-                    let {
-                        with(ContactGroups) {
-                            it[contactId] = id
-                            it[groupId] = group.id
-                        }
-                    }
-                }
-
-                id
-            }
-        } else dbQuery {
-            Contacts.update({ Contacts.id eq item.id }) {
-                it[firstName] = item.firstName
-                it[lastName] = item.lastName
+                item.id
             }
 
-            item.id
+            val newPhones = phonesDao.addAll(item.phones.filter { it.isNew })
+            ContactPhones.batchInsert(newPhones) { phone ->
+                let {
+                    with(ContactPhones) {
+                        it[contactId] = id
+                        it[phoneId] = phone.id
+                    }
+                }
+            }
+
+            val newEmails = emailsDao.addAll(item.emails.filter { it.isNew })
+            ContactEmails.batchInsert(newEmails) { email ->
+                let {
+                    with(ContactEmails) {
+                        it[contactId] = id
+                        it[emailId] = email.id
+                    }
+                }
+            }
+
+            ContactGroups.batchInsert(item.groups) { group ->
+                let {
+                    with(ContactGroups) {
+                        it[contactId] = id
+                        it[groupId] = group.id
+                    }
+                }
+            }
+
+            id
         }
-        listBinding.invalidate()
+        invalidate()
         return get(id) ?: throw NoSuchElementException("Cannot find email with id: $id")
     }
 
@@ -109,8 +116,9 @@ object ContactsDao : IDao<Contact>, KoinComponent {
         require(id >= 0)
         dbQuery {
             Contacts.deleteWhere { Contacts.id eq id }
+        }.also {
+            if (it > 0) invalidate()
         }
-        listBinding.invalidate()
     }
 }
 

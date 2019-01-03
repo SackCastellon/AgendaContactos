@@ -5,7 +5,7 @@ import agenda.model.Contact
 import agenda.model.Email
 import agenda.model.Group
 import agenda.model.Phone
-import agenda.util.select
+import agenda.util.selectList
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.TableView
@@ -83,66 +83,74 @@ class ContactOverview : Fragment() {
             label(selectedContact.select(Contact::fullnameProperty)).style { fontSize = 18.px }
 
             // Contact phones
-            vbox(5).bindChildren(selectedContact.select(Contact::phonesProperty)) {
-                hbox(5, Pos.CENTER_LEFT) {
-                    vbox(2) {
-                        label(it.labelProperty, converter = Phone.Label.converter) {
-                            style {
-                                fontSize = 10.px
-                                textFill = Color.GRAY
+            vbox(5) {
+                val phones = selectedContact.selectList(Contact::phonesProperty)
+                removeWhen { phones.booleanBinding { it.isNullOrEmpty() } }
+                bindChildren(phones) {
+                    hbox(5, Pos.CENTER_LEFT) {
+                        vbox(2) {
+                            label(it.labelProperty, converter = Phone.Label.converter) {
+                                style {
+                                    fontSize = 10.px
+                                    textFill = Color.GRAY
+                                }
+                            }
+                            label(it.phoneProperty) {
+                                contextmenu {
+                                    item(messages["context.copy"])
+                                        .action { Clipboard.getSystemClipboard().setContent { putString(it.phone) } }
+                                }
                             }
                         }
-                        label(it.phoneProperty) {
-                            contextmenu {
-                                item(messages["context.copy"])
-                                    .action { Clipboard.getSystemClipboard().setContent { putString(it.phone) } }
-                            }
+                        spacer()
+                        button {
+                            padding = insets(4)
+                            graphic = FontIcon.of(Material.PHONE, 19)
+                            action { browse("tel:${it.phone}") }
                         }
-                    }
-                    spacer()
-                    button {
-                        padding = insets(4)
-                        graphic = FontIcon.of(Material.PHONE, 19)
-                        action { browse("tel:${it.phone}") }
-                    }
-                    button {
-                        padding = insets(4)
-                        graphic = FontIcon.of(Material.SMS, 19)
-                        action { browse("sms:${it.phone}") }
+                        button {
+                            padding = insets(4)
+                            graphic = FontIcon.of(Material.SMS, 19)
+                            action { browse("sms:${it.phone}") }
+                        }
                     }
                 }
             }
 
             // Contact emails
-            vbox(5).bindChildren(selectedContact.select(Contact::emailsProperty)) {
-                hbox(5, Pos.CENTER_LEFT) {
-                    vbox(2) {
-                        label(it.labelProperty, converter = Email.Label.converter) {
-                            style {
-                                fontSize = 10.px
-                                textFill = Color.GRAY
+            vbox(5) {
+                val emails = selectedContact.selectList(Contact::emailsProperty)
+                removeWhen { emails.booleanBinding { it.isNullOrEmpty() } }
+                bindChildren(emails) {
+                    hbox(5, Pos.CENTER_LEFT) {
+                        vbox(2) {
+                            label(it.labelProperty, converter = Email.Label.converter) {
+                                style {
+                                    fontSize = 10.px
+                                    textFill = Color.GRAY
+                                }
                             }
-                        }
-                        label(it.emailProperty) {
-                            contextmenu {
-                                item(messages["context.copy"]) {
-                                    action { Clipboard.getSystemClipboard().putString(it.email) }
+                            label(it.emailProperty) {
+                                contextmenu {
+                                    item(messages["context.copy"]) {
+                                        action { Clipboard.getSystemClipboard().putString(it.email) }
+                                    }
                                 }
                             }
                         }
-                    }
-                    spacer()
-                    button {
-                        padding = insets(4)
-                        graphic = FontIcon.of(Material.EMAIL, 19)
-                        action { browse("mailto:${it.email}") }
+                        spacer()
+                        button {
+                            padding = insets(4)
+                            graphic = FontIcon.of(Material.EMAIL, 19)
+                            action { browse("mailto:${it.email}") }
+                        }
                     }
                 }
             }
 
             // Contact groups
             vbox(2) {
-                val groups = selectedContact.select(Contact::groupsProperty)
+                val groups = selectedContact.selectList(Contact::groupsProperty)
                 removeWhen { groups.booleanBinding { it.isNullOrEmpty() } }
                 label(messages["field.groups"]) {
                     style {

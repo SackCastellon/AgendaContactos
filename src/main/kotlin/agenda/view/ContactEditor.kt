@@ -6,6 +6,7 @@ import agenda.model.Group
 import agenda.model.Phone
 import agenda.view.styles.EditorStyles
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import javafx.collections.FXCollections
 import javafx.geometry.Pos
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.ChoiceBox
@@ -18,7 +19,6 @@ import org.apache.commons.validator.routines.EmailValidator
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
-import tornadofx.ValidationTrigger.OnChange
 
 class ContactEditor : Fragment() {
 
@@ -39,6 +39,10 @@ class ContactEditor : Fragment() {
 
     override val root: BorderPane = borderpane {
         addClass(EditorStyles.editor)
+
+        val phones = FXCollections.observableArrayList<Phone.ViewModel>().apply { bind(model.phones, Phone::ViewModel) }
+        val emails = FXCollections.observableArrayList<Email.ViewModel>().apply { bind(model.emails, Email::ViewModel) }
+
         top {
             hbox {
                 addClass(EditorStyles.header)
@@ -89,28 +93,25 @@ class ContactEditor : Fragment() {
                                 }
                             }
                         }
-                        vbox(5).bindChildren(model.phones) {
+                        vbox(5).bindChildren(phones) {
                             hbox(5) {
-                                lateinit var validatorPhone: ValidationContext.Validator<String>
-                                lateinit var validatorLabel: ValidationContext.Validator<Phone.Label>
-                                textfield(it.phoneProperty) {
+                                textfield(it.phone) {
                                     hgrow = Priority.ALWAYS
                                     prefWidth = 100.0
                                     promptText = messages["field.phone"]
-                                    validatorPhone = requireValidPhone()
+                                    requireValidPhone()
                                 }
-                                choicebox(it.labelProperty, Phone.Label.values().asList()) {
+                                choicebox(it.label, Phone.Label.values().asList()) {
                                     converter = Phone.Label.converter
                                     prefWidth = 85.0
-                                    validatorLabel = required()
+                                    required()
                                 }
                                 button {
                                     padding = insets(4)
                                     graphic = FontIcon.of(Material.REMOVE, 18)
                                     action {
-                                        model.validationContext.validators.removeAll(validatorPhone, validatorLabel)
                                         model.phones.apply {
-                                            val phone = value.first(it::equals)
+                                            val phone = value.first(it.item::equals)
                                             value = (value - phone).observable() // TODO Find a better solution
                                         }
                                     }
@@ -135,28 +136,25 @@ class ContactEditor : Fragment() {
                                 }
                             }
                         }
-                        vbox(5).bindChildren(model.emails) {
+                        vbox(5).bindChildren(emails) {
                             hbox(5) {
-                                lateinit var validatorEmail: ValidationContext.Validator<String>
-                                lateinit var validatorLabel: ValidationContext.Validator<Email.Label>
-                                textfield(it.emailProperty) {
+                                textfield(it.email) {
                                     hgrow = Priority.ALWAYS
                                     prefWidth = 100.0
                                     promptText = messages["field.email"]
-                                    validatorEmail = requireValidEmail()
+                                    requireValidEmail()
                                 }
-                                choicebox(it.labelProperty, Email.Label.values().asList()) {
+                                choicebox(it.label, Email.Label.values().asList()) {
                                     converter = Email.Label.converter
                                     prefWidth = 85.0
-                                    validatorLabel = required()
+                                    required()
                                 }
                                 button {
                                     padding = insets(4)
                                     graphic = FontIcon.of(Material.REMOVE, 18)
                                     action {
-                                        model.validationContext.validators.removeAll(validatorEmail, validatorLabel)
                                         model.emails.apply {
-                                            val email = value.first(it::equals)
+                                            val email = value.first(it.item::equals)
                                             value = (value - email).observable() // TODO Find a better solution
                                         }
                                     }
@@ -187,9 +185,17 @@ class ContactEditor : Fragment() {
                 button(messages["button.save"], ButtonBar.ButtonData.OK_DONE) {
                     isDefaultButton = true
                     action {
-                        model.commit {
-                            _success = true
-                            close()
+                        var isValid = true
+                        isValid = phones.fold(isValid) { valid, model -> model.validate(valid) && valid }
+                        isValid = emails.fold(isValid) { valid, model -> model.validate(valid) && valid }
+                        isValid = isValid and model.validate()
+                        if (isValid) {
+                            phones.forEach { it.commit() }
+                            emails.forEach { it.commit() }
+                            model.commit {
+                                _success = true
+                                close()
+                            }
                         }
                     }
                 }
@@ -208,32 +214,26 @@ class ContactEditor : Fragment() {
         }
     }
 
-    private fun TextField.requireValidPhone(): ValidationContext.Validator<String> {
-        return model.validationContext.addValidator(this, textProperty(), OnChange()) {
-            when {
-                it.isNullOrBlank() -> error(messages["error.field.blank"])
-                !phoneUtil.runCatching { isValidNumber(parse(it, "ES")) }.getOrDefault(false) -> error(messages["error.field.invalidPhone"])
-                else -> null
-            }
+    private fun TextField.requireValidPhone() = validator {
+        when {
+            it.isNullOrBlank() -> error(messages["error.field.blank"])
+            !phoneUtil.runCatching { isValidNumber(parse(it, "ES")) }.getOrDefault(false) -> error(messages["error.field.invalidPhone"])
+            else -> null
         }
     }
 
-    private fun TextField.requireValidEmail(): ValidationContext.Validator<String> {
-        return model.validationContext.addValidator(this, textProperty(), OnChange()) {
-            when {
-                it.isNullOrBlank() -> error(messages["error.field.blank"])
-                !emailValidator.isValid(it) -> error(messages["error.field.invalidEmail"])
-                else -> null
-            }
+    private fun TextField.requireValidEmail() = validator {
+        when {
+            it.isNullOrBlank() -> error(messages["error.field.blank"])
+            !emailValidator.isValid(it) -> error(messages["error.field.invalidEmail"])
+            else -> null
         }
     }
 
-    private inline fun <reified T : Any> ChoiceBox<T>.required(): ValidationContext.Validator<T> {
-        return model.validationContext.addValidator(this, valueProperty(), OnChange()) {
-            when (it) {
-                null -> error(messages["error.field.empty"])
-                else -> null
-            }
+    private inline fun <reified T : Any> ChoiceBox<T>.required() = validator {
+        when (it) {
+            null -> error(messages["error.field.empty"])
+            else -> null
         }
     }
 
