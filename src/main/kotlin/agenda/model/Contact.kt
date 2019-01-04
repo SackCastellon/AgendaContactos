@@ -30,8 +30,8 @@ sealed class Contact(
     val lastNameProperty: StringProperty = SimpleStringProperty(lastName)
     var lastName: String by lastNameProperty
 
-    val fullnameProperty: StringExpression = Bindings.format("%s %s", firstNameProperty, lastNameProperty)
-    val fullname: String by fullnameProperty
+    val fullNameProperty: StringExpression = Bindings.format("%s %s", firstNameProperty, lastNameProperty)
+    val fullName: String by fullNameProperty
 
     val phonesProperty: ListProperty<Phone> = SimpleListProperty(FXCollections.observableArrayList(phones))
     var phones: ObservableList<Phone> by phonesProperty

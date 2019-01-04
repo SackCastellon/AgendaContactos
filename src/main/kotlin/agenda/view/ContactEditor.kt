@@ -1,9 +1,11 @@
 package agenda.view
 
+import agenda.data.dao.IDao
 import agenda.model.Contact
 import agenda.model.Email
 import agenda.model.Group
 import agenda.model.Phone
+import agenda.view.styles.CommonStyles
 import agenda.view.styles.EditorStyles
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import javafx.collections.FXCollections
@@ -16,6 +18,8 @@ import javafx.scene.input.KeyCode
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import org.apache.commons.validator.routines.EmailValidator
+import org.koin.standalone.KoinComponent
+import org.koin.standalone.inject
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
@@ -45,11 +49,11 @@ class ContactEditor : Fragment() {
 
         top {
             hbox {
-                addClass(EditorStyles.header)
+                addClass(CommonStyles.header)
                 vbox(5) {
                     label(messages["title"])
                     label(messages["heading.${mode.name.toLowerCase()}"]) {
-                        addClass(EditorStyles.heading)
+                        addClass(CommonStyles.heading)
                     }
                 }
             }
@@ -60,7 +64,7 @@ class ContactEditor : Fragment() {
                 prefHeight = 350.0
 
                 vbox(7) {
-                    addClass(EditorStyles.content)
+                    addClass(CommonStyles.content)
                     prefWidth = 300.0
 
                     // TODO Contact image
@@ -177,10 +181,10 @@ class ContactEditor : Fragment() {
         }
         bottom {
             buttonbar {
-                addClass(EditorStyles.buttons)
+                addClass(CommonStyles.buttons)
                 button(messages["button.cancel"], ButtonBar.ButtonData.CANCEL_CLOSE) {
                     isCancelButton = true
-                    action { close() }
+                    action(::close)
                 }
                 button(messages["button.save"], ButtonBar.ButtonData.OK_DONE) {
                     isDefaultButton = true
@@ -242,6 +246,24 @@ class ContactEditor : Fragment() {
             groupsList.bindContentBidirectional(model.groups)
             openModal(block = true, resizable = false)
             groupsList.unbindContentBidirectional(model.groups)
+        }
+    }
+
+    companion object : KoinComponent {
+        private val contacts: IDao<Contact> by inject("contacts")
+
+        internal fun Component.new() {
+            val editor = find<ContactEditor> { openModal(block = true) }
+            if (editor.success) contacts.add(editor.contact)
+        }
+
+        internal fun Component.edit(contact: Contact) {
+            val editor = find<ContactEditor>(ContactEditor::contact to contact) { openModal(block = true) }
+            if (editor.success) contacts.add(editor.contact)
+        }
+
+        internal fun Component.delete(contact: Contact) {
+            contacts.remove(contact.id)
         }
     }
 

@@ -4,15 +4,16 @@ import agenda.data.DatabaseManager
 import agenda.util.Directories
 import agenda.util.KoinContainer
 import agenda.view.RootLayout
+import agenda.view.styles.CommonStyles
 import agenda.view.styles.EditorStyles
-import agenda.view.styles.GroupStyles
 import tornadofx.App
 import tornadofx.FX
 import tornadofx.launch
 
-class Agenda : App(RootLayout::class, EditorStyles::class, GroupStyles::class) {
+class Agenda : App(RootLayout::class, CommonStyles::class, EditorStyles::class) {
     override fun init() {
         FX.dicontainer = KoinContainer
+        FX.messagesNameProvider = { "bundles.${it?.simpleName ?: "Messages"}" }
 
         // Initialize directories
         Directories.create()

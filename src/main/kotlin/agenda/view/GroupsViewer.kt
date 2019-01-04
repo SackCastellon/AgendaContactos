@@ -4,7 +4,7 @@ import agenda.data.dao.IDao
 import agenda.model.Contact
 import agenda.model.Group
 import agenda.model.isDefault
-import agenda.view.styles.GroupStyles
+import agenda.view.styles.CommonStyles
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.ButtonBar
@@ -23,10 +23,9 @@ class GroupsViewer : Fragment() {
     private val groupModel = Group.ViewModel(Group.empty())
 
     override val root = borderpane {
-        addClass(GroupStyles.selector)
         top {
             hbox {
-                addClass(GroupStyles.header)
+                addClass(CommonStyles.header)
                 vbox(5) {
                     label(messages["title"])
                 }
@@ -39,7 +38,7 @@ class GroupsViewer : Fragment() {
                 prefWidth = 225.0
 
                 vbox(7) {
-                    addClass(GroupStyles.content)
+                    addClass(CommonStyles.content)
 
                     vbox(5).bindChildren(groups.observable) { group ->
                         hbox(5) {
@@ -113,7 +112,7 @@ class GroupsViewer : Fragment() {
         }
         bottom {
             buttonbar {
-                addClass(GroupStyles.buttons)
+                addClass(CommonStyles.buttons)
                 button(messages["button.close"], ButtonBar.ButtonData.CANCEL_CLOSE) {
                     isCancelButton = true
                     action(::close)

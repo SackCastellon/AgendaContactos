@@ -2,7 +2,7 @@ package agenda.view
 
 import agenda.data.dao.IDao
 import agenda.model.Group
-import agenda.view.styles.GroupStyles
+import agenda.view.styles.CommonStyles
 import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
@@ -23,10 +23,9 @@ class GroupSelector : Fragment() {
     val groupsList: ListProperty<Group> = SimpleListProperty(FXCollections.observableArrayList())
 
     override val root = borderpane {
-        addClass(GroupStyles.selector)
         top {
             hbox {
-                addClass(GroupStyles.header)
+                addClass(CommonStyles.header)
                 vbox(5) {
                     label(messages["title"])
                 }
@@ -39,7 +38,7 @@ class GroupSelector : Fragment() {
                 prefWidth = 225.0
 
                 vbox(7) {
-                    addClass(GroupStyles.content)
+                    addClass(CommonStyles.content)
 
                     vbox(5).bindChildren(groups.observable) {
                         hbox(5) {
@@ -92,7 +91,7 @@ class GroupSelector : Fragment() {
         }
         bottom {
             buttonbar {
-                addClass(GroupStyles.buttons)
+                addClass(CommonStyles.buttons)
                 button(messages["button.close"], ButtonBar.ButtonData.CANCEL_CLOSE) {
                     isCancelButton = true
                     action(::close)

@@ -21,7 +21,7 @@ repositories {
 dependencies {
     // Kotlin Standard Library
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.1.0")
 
     // Dependency Injection
     implementation("org.koin:koin-core:$koinVersion")
@@ -32,10 +32,10 @@ dependencies {
     implementation("com.google.guava:guava:27.0.1-jre")
 
     // User Interface
-    implementation("no.tornado:tornadofx:1.7.18")
+    implementation("no.tornado:tornadofx:1.7.19-SNAPSHOT")
     implementation("no.tornado:tornadofx-controlsfx:0.1.1")
     implementation("org.controlsfx:controlsfx:8.40.14")
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.11")
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12")
 
     // Icons
     implementation("org.kordamp.ikonli:ikonli-javafx:$ikonliVersion")

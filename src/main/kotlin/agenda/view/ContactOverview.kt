@@ -5,7 +5,9 @@ import agenda.model.Contact
 import agenda.model.Email
 import agenda.model.Group
 import agenda.model.Phone
+import agenda.util.ContactQuery
 import agenda.util.selectList
+import javafx.beans.property.ReadOnlyObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.TableView
@@ -16,22 +18,22 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import mu.KotlinLogging
-import org.controlsfx.control.textfield.AutoCompletionBinding.ISuggestionRequest
+import org.koin.standalone.KoinComponent
+import org.koin.standalone.get
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
 import java.awt.Desktop
 import java.net.URI
 
-class ContactOverview : Fragment() {
-
-    private val contacts: IDao<Contact> by di("contacts")
+class ContactOverview : Fragment(), KoinComponent {
 
     override val root: BorderPane by fxml(hasControllerAttribute = true)
 
     private val searchBox: TextField by fxid()
 
     private val contactsTable: TableView<Contact> by fxid()
+    val selectedContact: ReadOnlyObjectProperty<Contact> = contactsTable.selectionModel.selectedItemProperty()
 
     private val contactDetails: VBox by fxid()
 
@@ -41,31 +43,32 @@ class ContactOverview : Fragment() {
     private val deleteContact: Button by fxid()
 
     init {
-        // TODO Implement search functionality
-
         contactsTable.apply {
-            column(messages["column.contacts"], Contact::fullnameProperty)
+            column(messages["column.contacts"], Contact::fullNameProperty)
         }
 
-        val contactsList = SortedFilteredList(contacts.observable).bindTo(contactsTable)
+        val data = SortedFilteredList(get<IDao<Contact>>("contacts").observable).also { contactsTable.items = it }
 
-        val selectedContact = contactsTable.selectionModel.selectedItemProperty()
+        searchBox.textProperty().objectBinding { ContactQuery.parse(it.orEmpty()) }.onChange {
+            data.predicate = it?.predicate
+            data.sortedItems.comparator = it?.comparator
+        }
 
         groups.apply {
             action(::handleGroups)
         }
 
         newContact.apply {
-            action(::handleNewContact)
+            action { with(ContactEditor) { new() } }
         }
 
         editContact.apply {
-            action(::handleEditContact)
+            action { with(ContactEditor) { edit(selectedContact.value!!) } }
             enableWhen(selectedContact.isNotNull)
         }
 
         deleteContact.apply {
-            action(::handleDeleteContact)
+            action { with(ContactEditor) { delete(selectedContact.value!!) } }
             enableWhen(selectedContact.isNotNull)
         }
 
@@ -80,7 +83,7 @@ class ContactOverview : Fragment() {
             }
 
             // Contact name
-            label(selectedContact.select(Contact::fullnameProperty)).style { fontSize = 18.px }
+            label(selectedContact.select(Contact::fullNameProperty)).style { fontSize = 18.px }
 
             // Contact phones
             vbox(5) {
@@ -163,57 +166,15 @@ class ContactOverview : Fragment() {
         }
     }
 
-    private fun browse(uri: String): Unit = if (SUPPORTS_BROWSE) Desktop.getDesktop().browse(URI(uri)) else Unit
-
-    private fun getSuggestions(request: ISuggestionRequest): List<Contact> {
-        val query = request.userText
-
-        fun String.matches(): Boolean = contains(query, true)
-
-        return contacts.getAll().asSequence().filter { contact ->
-            contact.firstName.matches() ||
-                    contact.lastName.matches() ||
-                    contact.phones.any { it.phone.matches() } ||
-                    contact.emails.any { it.email.matches() } ||
-                    contact.groups.any { it.name.matches() }
-        }.toList()
-    }
-
     private fun handleGroups() {
         find<GroupsViewer> { openModal(block = true, resizable = false) }
-    }
-
-    private fun handleNewContact() {
-        val editor = find<ContactEditor> { openModal(block = true) }
-        if (editor.success) contacts.add(editor.contact)
-    }
-
-    private fun handleEditContact() {
-        val selectedContact = contactsTable.selectedItem
-
-        if (selectedContact == null) {
-            logger.error("There is no selected contact to be edited!")
-            return
-        }
-
-        val editor = find<ContactEditor>(ContactEditor::contact to selectedContact) { openModal(block = true) }
-        if (editor.success) contacts.add(editor.contact)
-    }
-
-    private fun handleDeleteContact() {
-        val selectedContact = contactsTable.selectedItem
-
-        if (selectedContact == null) {
-            logger.error("There is no selected contact to be deleted!")
-            return
-        }
-
-        contacts.remove(selectedContact.id)
     }
 
     companion object {
         private val logger = KotlinLogging.logger {}
         private val DEFAULT_IMAGE by lazy { Image("/images/grey_silhouette.png") }
         private val SUPPORTS_BROWSE by lazy { Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE) }
+
+        private fun browse(uri: String): Unit = if (SUPPORTS_BROWSE) Desktop.getDesktop().browse(URI(uri)) else Unit
     }
 }

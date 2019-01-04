@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.BorderPane?>
 <?import org.controlsfx.control.StatusBar?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="500.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.171"
@@ -9,29 +8,11 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <Menu text="%menu.file">
-                <MenuItem onAction="#handleNew" text="%menu.file.new">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                    </accelerator>
-                </MenuItem>
-                <SeparatorMenuItem mnemonicParsing="false"/>
-                <MenuItem onAction="#handleOpen" text="%menu.file.open">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                    </accelerator>
-                </MenuItem>
-                <SeparatorMenuItem mnemonicParsing="false"/>
-                <MenuItem onAction="#handleSave" text="%menu.file.save">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                    </accelerator>
-                </MenuItem>
+                <MenuItem onAction="#handleExport" text="%menu.file.export"/>
                 <SeparatorMenuItem mnemonicParsing="false"/>
                 <MenuItem onAction="#handleQuit" text="%menu.file.quit"/>
             </Menu>
-            <Menu text="%menu.edit">
-                <MenuItem text="%menu.edit.delete"/>
-            </Menu>
+            <Menu fx:id="menuEdit" text="%menu.edit"/>
             <Menu text="%menu.help">
                 <MenuItem text="%menu.help.about"/>
             </Menu>
