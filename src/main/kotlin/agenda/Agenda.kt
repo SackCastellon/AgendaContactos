@@ -9,11 +9,17 @@ import agenda.view.styles.EditorStyles
 import tornadofx.App
 import tornadofx.FX
 import tornadofx.launch
+import java.util.*
 
 class Agenda : App(RootLayout::class, CommonStyles::class, EditorStyles::class) {
     override fun init() {
         FX.dicontainer = KoinContainer
         FX.messagesNameProvider = { "bundles.${it?.simpleName ?: "Messages"}" }
+
+        // TODO Remove temporal fix
+        val tmp = FX.locale
+        FX.locale = Locale.ROOT
+        FX.locale = tmp
 
         // Initialize directories
         Directories.create()
