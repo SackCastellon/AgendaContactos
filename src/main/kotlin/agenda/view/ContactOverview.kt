@@ -10,6 +10,7 @@ import agenda.util.selectList
 import javafx.beans.property.ReadOnlyObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.control.Button
+import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.control.TextField
 import javafx.scene.image.Image
@@ -31,6 +32,7 @@ class ContactOverview : Fragment(), KoinComponent {
     override val root: BorderPane by fxml(hasControllerAttribute = true)
 
     private val searchBox: TextField by fxid()
+    private val searchLabel: Label by fxid()
 
     private val contactsTable: TableView<Contact> by fxid()
     val selectedContact: ReadOnlyObjectProperty<Contact> = contactsTable.selectionModel.selectedItemProperty()
@@ -51,22 +53,31 @@ class ContactOverview : Fragment(), KoinComponent {
 
         searchBox.textProperty().onChange { data.predicate = ContactQuery.parse(it.orEmpty()).predicate }
 
+        searchLabel.apply {
+            text=messages["search.label"]
+        }
+
         groups.apply {
             action(::handleGroups)
+            text=messages["button.groups"]
+
         }
 
         newContact.apply {
             action { with(ContactEditor) { new() } }
+            text=messages["button.new"]
         }
 
         editContact.apply {
             action { with(ContactEditor) { edit(selectedContact.value!!) } }
             enableWhen(selectedContact.isNotNull)
+            text=messages["button.edit"]
         }
 
         deleteContact.apply {
             action { with(ContactEditor) { delete(selectedContact.value!!) } }
             enableWhen(selectedContact.isNotNull)
+            text=messages["button.delete"]
         }
 
         contactDetails.apply {
