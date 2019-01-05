@@ -1,21 +1,26 @@
 package agenda.model
 
 import agenda.model.converter.StringConverter
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javafx.beans.property.*
 import javafx.util.StringConverter
 import tornadofx.*
 
 sealed class Phone(
+    @get:JsonIgnore
     val id: Int,
     phone: String = "",
     label: Label? = null
 ) {
     @Suppress("LeakingThis")
+    @get:JsonIgnore
     val isNew: Boolean = this is New
 
+    @get:JsonIgnore
     val phoneProperty: StringProperty = SimpleStringProperty(phone)
     var phone: String by phoneProperty
 
+    @get:JsonIgnore
     val labelProperty: ObjectProperty<Label> = SimpleObjectProperty(label)
     var label: Label by labelProperty
 

@@ -1,5 +1,6 @@
 package agenda.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringExpression
 import javafx.beans.property.*
@@ -11,6 +12,7 @@ import tornadofx.getValue
 import tornadofx.setValue
 
 sealed class Contact(
+    @get:JsonIgnore
     val id: Int,
     firstName: String = "",
     lastName: String = "",
@@ -19,26 +21,36 @@ sealed class Contact(
     groups: List<Group> = emptyList()
 ) {
     @Suppress("LeakingThis")
+    @get:JsonIgnore
     val isNew: Boolean = this is New
 
+    @get:JsonIgnore
     val imageProperty: ObjectProperty<Image?> = SimpleObjectProperty() // TODO
+    @get:JsonIgnore
     var image: Image? by imageProperty
 
+    @get:JsonIgnore
     val firstNameProperty: StringProperty = SimpleStringProperty(firstName)
     var firstName: String by firstNameProperty
 
+    @get:JsonIgnore
     val lastNameProperty: StringProperty = SimpleStringProperty(lastName)
     var lastName: String by lastNameProperty
 
+    @get:JsonIgnore
     val fullNameProperty: StringExpression = Bindings.format("%s %s", firstNameProperty, lastNameProperty)
+    @get:JsonIgnore
     val fullName: String by fullNameProperty
 
+    @get:JsonIgnore
     val phonesProperty: ListProperty<Phone> = SimpleListProperty(FXCollections.observableArrayList(phones))
     var phones: ObservableList<Phone> by phonesProperty
 
+    @get:JsonIgnore
     val emailsProperty: ListProperty<Email> = SimpleListProperty(FXCollections.observableArrayList(emails))
     var emails: ObservableList<Email> by emailsProperty
 
+    @get:JsonIgnore
     val groupsProperty: ListProperty<Group> = SimpleListProperty(FXCollections.observableArrayList(groups))
     var groups: ObservableList<Group> by groupsProperty
 

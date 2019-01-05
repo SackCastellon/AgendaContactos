@@ -1,5 +1,6 @@
 package agenda.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javafx.beans.property.Property
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
@@ -8,12 +9,15 @@ import tornadofx.getValue
 import tornadofx.setValue
 
 sealed class Group(
+    @get:JsonIgnore
     val id: Int,
     name: String = ""
 ) {
     @Suppress("LeakingThis")
+    @get:JsonIgnore
     val isNew: Boolean = this is New
 
+    @get:JsonIgnore
     val nameProperty: StringProperty = SimpleStringProperty(name)
     var name: String by nameProperty
 

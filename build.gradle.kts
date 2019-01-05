@@ -28,6 +28,7 @@ dependencies {
     implementation("org.koin:koin-core-ext:$koinVersion")
     implementation("org.koin:koin-logger-slf4j:$koinVersion")
 
+    // Collections
     implementation("com.github.ben-manes.caffeine:caffeine:2.6.2")
     implementation("com.google.guava:guava:27.0.1-jre")
 
@@ -45,6 +46,10 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed:0.11.2")
     implementation("org.xerial:sqlite-jdbc:3.25.2")
     implementation("org.postgresql:postgresql:42.2.5")
+
+    // Data Export
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
+    implementation("com.googlecode.ez-vcard:ez-vcard:0.10.5")
 
     // Directories
     implementation("io.github.soc:directories:10")

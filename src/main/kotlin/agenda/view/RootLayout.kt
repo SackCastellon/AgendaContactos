@@ -56,7 +56,7 @@ class RootLayout : View() {
 
     @FXML
     private fun handleExport(event: ActionEvent) {
-        find<ContactExporter> { openModal() }
+        find<ContactExporter> { openModal(resizable = false) }
     }
 
     @FXML
