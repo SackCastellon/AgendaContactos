@@ -185,12 +185,12 @@ class ContactExporter : View(), KoinComponent {
 
                 val data = contacts.map { it.stringify() }
 
-                file.writer { w -> data.forEach { w.appendln(it) } }
+                file.use { w -> data.forEach { w.appendln(it) } }
             }
         },
         JSON("JavaScript Object Notation", "*.json") {
             override fun export(contacts: List<Contact>, file: File) {
-                file.writer { jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValue(it, contacts) }
+                file.use { jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValue(it, contacts) }
             }
         },
         VCF("Virtual Contact File", "*.vcf") {
@@ -219,7 +219,7 @@ class ContactExporter : View(), KoinComponent {
                     }
                 }
 
-                file.writer { VCardWriter(it, VCardVersion.V4_0).use { vCards.forEach(it::write) } }
+                file.use { VCardWriter(it, VCardVersion.V4_0).use { vCardWriter -> vCards.forEach(vCardWriter::write) } }
             }
         };
 
@@ -227,7 +227,7 @@ class ContactExporter : View(), KoinComponent {
 
         protected abstract fun export(contacts: List<Contact>, file: File)
 
-        protected inline fun File.writer(block: (Writer) -> Unit) {
+        protected inline fun File.use(block: (Writer) -> Unit) {
             val file = this.toPath().toAbsolutePath()
             if (Files.notExists(file.parent)) Files.createDirectories(file.parent)
             Files.newBufferedWriter(file, Charsets.UTF_8, WRITE, TRUNCATE_EXISTING, CREATE).use(block)
@@ -239,8 +239,8 @@ class ContactExporter : View(), KoinComponent {
         }
 
         companion object {
-            val filters: Array<ExtensionFilter> = values().map(ExportFormat::filter).toTypedArray()
-            fun byExtension(ext: String): ExportFormat? = values().firstOrNull { ext.equals(it.extension.substring(2), ignoreCase = true) }
+            @JvmField val filters: Array<ExtensionFilter> = values().map(ExportFormat::filter).toTypedArray()
+            @JvmStatic fun byExtension(ext: String): ExportFormat? = values().firstOrNull { ext.equals(it.extension.substring(2), ignoreCase = true) }
         }
     }
 

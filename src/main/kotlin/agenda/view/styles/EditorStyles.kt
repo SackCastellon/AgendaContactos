@@ -7,8 +7,8 @@ import tornadofx.cssclass
 
 class EditorStyles : Stylesheet() {
     companion object {
-        val editor: CssRule by cssclass()
-        val fieldset: CssRule by cssclass()
+        @JvmStatic val editor: CssRule by cssclass()
+        @JvmStatic val fieldset: CssRule by cssclass()
     }
 
     init {

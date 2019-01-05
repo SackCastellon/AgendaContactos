@@ -12,19 +12,15 @@ object Directories {
     private val root: Path = Paths.get(BaseDirectories.get().dataLocalDir, "UJI", "Agenda")
 
     private val data: Path = root / "data"
-    private val cache: Path = root / "cache"
-    private val config: Path = root / "config"
 
-    val databaseFile: Path = data / "database.sqlite"
-    val configFile: Path = config / "configuration.json"
-    val lockFile: Path = cache / ".lock"
+    @JvmField val databaseFile: Path = data / "database.sqlite"
 
     init {
         logger.debug { "Root directory: $root" }
     }
 
-    fun create() {
-        listOf(data, cache, config)
+    @JvmStatic fun create() {
+        listOf(data)
             .filter { Files.notExists(it) }
             .also { if (it.isNotEmpty()) logger.debug { "Creating sub-directories:" } }
             .forEach { dir ->

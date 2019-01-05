@@ -25,7 +25,7 @@ sealed class ContactQuery {
                             contact.emails.flatMap { listOf(it.label.name, it.email) } +
                             contact.groups.map { it.name }
 
-                words.sumBy { w -> fieldValues.count { it.contains(w) } }
+                words.sumBy { w -> fieldValues.count { it.contains(w, true) } }
             }
 
         override val predicate: (Contact) -> Boolean = { cache[it]!! > 0 }
@@ -34,7 +34,7 @@ sealed class ContactQuery {
 
     private class ComplexQuery(words: List<String>, fields: Map<String, String>) : ContactQuery() {
         companion object {
-            val fieldMap = mapOf(
+            @JvmField internal val fieldMap = mapOf(
                 "firstName" to Contact::firstName,
                 "lastName" to Contact::lastName,
                 "fullName" to Contact::fullName
@@ -52,7 +52,7 @@ sealed class ContactQuery {
                                 contact.emails.flatMap { listOf(it.label.name, it.email) } +
                                 contact.groups.map { it.name }
 
-                    words.sumBy { w -> fieldValues.count { it.contains(w) } } + count
+                    words.sumBy { w -> fieldValues.count { it.contains(w, true) } } + count
                 }
             }
 
@@ -61,7 +61,7 @@ sealed class ContactQuery {
     }
 
     companion object {
-        fun parse(query: String): ContactQuery {
+        @JvmStatic fun parse(query: String): ContactQuery {
             if (query.isBlank()) return EmptyQuery
 
             val words = mutableListOf<String>()

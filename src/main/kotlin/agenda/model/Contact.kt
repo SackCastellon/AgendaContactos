@@ -85,8 +85,8 @@ sealed class Contact(
     }
 
     companion object {
-        fun empty(): Contact = New()
-        fun create(
+        @JvmStatic fun empty(): Contact = New()
+        @JvmStatic fun create(
             id: Int,
             firstName: String,
             lastName: String,

@@ -47,12 +47,9 @@ class ContactOverview : Fragment(), KoinComponent {
             column(messages["column.contacts"], Contact::fullNameProperty)
         }
 
-        val data = SortedFilteredList(get<IDao<Contact>>("contacts").observable).also { contactsTable.items = it }
+        val data = SortedFilteredList(get<IDao<Contact>>("contacts").observable).bindTo(contactsTable)
 
-        searchBox.textProperty().objectBinding { ContactQuery.parse(it.orEmpty()) }.onChange {
-            data.predicate = it?.predicate
-            data.sortedItems.comparator = it?.comparator
-        }
+        searchBox.textProperty().onChange { data.predicate = ContactQuery.parse(it.orEmpty()).predicate }
 
         groups.apply {
             action(::handleGroups)

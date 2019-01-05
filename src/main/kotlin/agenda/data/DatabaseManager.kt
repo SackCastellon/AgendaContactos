@@ -25,9 +25,9 @@ object DatabaseManager {
         }
     }
 
-    internal fun <T> dbQuery(query: Transaction.() -> T): T = transaction(Connection.TRANSACTION_SERIALIZABLE, 1, db, query)
+    @JvmStatic internal fun <T> dbQuery(query: Transaction.() -> T): T = transaction(Connection.TRANSACTION_SERIALIZABLE, 1, db, query)
 
-    fun setup() {
+    @JvmStatic fun setup() {
         dbQuery {
             val firstTime = !Groups.exists()
 
@@ -41,15 +41,7 @@ object DatabaseManager {
                 ContactGroups
             )
 
-            if (firstTime) {
-                Groups.batchInsert(Group.defaults.map { Group.default(it) }) { group ->
-                    let {
-                        with(Groups) {
-                            it[name] = group.name
-                        }
-                    }
-                }
-            }
+            if (firstTime) Groups.batchInsert(Group.defaults.map { Group.default(it) }) { group -> this[Groups.name] = group.name }
         }
     }
 }

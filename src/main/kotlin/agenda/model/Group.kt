@@ -38,16 +38,16 @@ sealed class Group(
     }
 
     override fun toString(): String {
-        return "Group(id=$id, firstName=$name)"
+        return "Group(id=$id, name=$name)"
     }
 
     companion object {
-        internal val defaults = listOf("Familia", "Amigos", "Trabajo")
+        @JvmField internal val defaults = listOf("Familia", "Amigos", "Trabajo")
 
-        internal fun default(name: String): Group = New().apply { this.name = name }
-        fun empty(): Group = New()
-        fun empty(idBlacklist: Set<Int>): Group = New((-1 downTo Int.MIN_VALUE).first { it !in idBlacklist })
-        fun create(id: Int, name: String): Group = Existing(id, name)
+        @JvmStatic internal fun default(name: String): Group = New().apply { this.name = name }
+        @JvmStatic fun empty(): Group = New()
+        @JvmStatic fun empty(idBlacklist: Set<Int>): Group = New((-1 downTo Int.MIN_VALUE).first { it !in idBlacklist })
+        @JvmStatic fun create(id: Int, name: String): Group = Existing(id, name)
     }
 
     private class New(id: Int = -1) : Group(id) {

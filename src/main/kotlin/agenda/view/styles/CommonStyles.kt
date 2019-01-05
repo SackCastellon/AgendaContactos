@@ -6,10 +6,10 @@ import tornadofx.*
 
 class CommonStyles : Stylesheet() {
     companion object {
-        val header: CssRule by cssclass()
-        val heading: CssRule by cssclass()
-        val content: CssRule by cssclass()
-        val buttons: CssRule by cssclass()
+        @JvmStatic val header: CssRule by cssclass()
+        @JvmStatic val heading: CssRule by cssclass()
+        @JvmStatic val content: CssRule by cssclass()
+        @JvmStatic val buttons: CssRule by cssclass()
     }
 
     init {

@@ -252,17 +252,17 @@ class ContactEditor : Fragment() {
     companion object : KoinComponent {
         private val contacts: IDao<Contact> by inject("contacts")
 
-        internal fun Component.new() {
+        @JvmStatic internal fun Component.new() {
             val editor = find<ContactEditor> { openModal(block = true) }
             if (editor.success) contacts.add(editor.contact)
         }
 
-        internal fun Component.edit(contact: Contact) {
+        @JvmStatic internal fun Component.edit(contact: Contact) {
             val editor = find<ContactEditor>(ContactEditor::contact to contact) { openModal(block = true) }
             if (editor.success) contacts.add(editor.contact)
         }
 
-        internal fun Component.delete(contact: Contact) {
+        @JvmStatic internal fun Component.delete(contact: Contact) {
             contacts.remove(contact.id)
         }
     }

@@ -47,9 +47,9 @@ sealed class Phone(
     }
 
     companion object {
-        fun empty(): Phone = New()
-        fun empty(idBlacklist: Set<Int>): Phone = New((-1 downTo Int.MIN_VALUE).first { it !in idBlacklist })
-        fun create(id: Int, phone: String, label: Label): Phone = Existing(id, phone, label)
+        @JvmStatic fun empty(): Phone = New()
+        @JvmStatic fun empty(idBlacklist: Set<Int>): Phone = New((-1 downTo Int.MIN_VALUE).first { it !in idBlacklist })
+        @JvmStatic fun create(id: Int, phone: String, label: Label): Phone = Existing(id, phone, label)
     }
 
     private class New(id: Int = -1) : Phone(id) {
@@ -74,7 +74,7 @@ sealed class Phone(
         MOBILE;
 
         companion object {
-            val converter: StringConverter<Label> = StringConverter { FX.messages["phone.label.${it.name.toLowerCase()}"] }
+            @JvmField val converter: StringConverter<Label> = StringConverter { FX.messages["phone.label.${it.name.toLowerCase()}"] }
         }
     }
 

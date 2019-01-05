@@ -9,23 +9,19 @@ import agenda.view.styles.EditorStyles
 import tornadofx.App
 import tornadofx.FX
 import tornadofx.launch
-import java.util.*
 
 class Agenda : App(RootLayout::class, CommonStyles::class, EditorStyles::class) {
     override fun init() {
         FX.dicontainer = KoinContainer
         FX.messagesNameProvider = { "bundles.${it?.simpleName ?: "Messages"}" }
 
-        // FIXME
-        val tmp = FX.locale
-        FX.locale = Locale.ROOT
-        FX.locale = tmp
-
         // Initialize directories
         Directories.create()
         // Initialize database manager
         DatabaseManager.setup()
     }
-}
 
-fun main(args: Array<String>): Unit = launch<Agenda>(args)
+    companion object {
+        @JvmStatic fun main(args: Array<String>): Unit = launch<Agenda>(args)
+    }
+}

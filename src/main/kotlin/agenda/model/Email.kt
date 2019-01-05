@@ -47,9 +47,9 @@ sealed class Email(
     }
 
     companion object {
-        fun empty(): Email = New()
-        fun empty(idBlacklist: Set<Int>): Email = New((-1 downTo Int.MIN_VALUE).first { it !in idBlacklist })
-        fun create(id: Int, email: String, label: Label): Email = Existing(id, email, label)
+        @JvmStatic fun empty(): Email = New()
+        @JvmStatic fun empty(idBlacklist: Set<Int>): Email = New((-1 downTo Int.MIN_VALUE).first { it !in idBlacklist })
+        @JvmStatic fun create(id: Int, email: String, label: Label): Email = Existing(id, email, label)
     }
 
     private class New(id: Int = -1) : Email(id) {
@@ -73,7 +73,7 @@ sealed class Email(
         WORK;
 
         companion object {
-            val converter: StringConverter<Label> = StringConverter { FX.messages["email.label.${it.name.toLowerCase()}"] }
+            @JvmField val converter: StringConverter<Label> = StringConverter { FX.messages["email.label.${it.name.toLowerCase()}"] }
         }
     }
 
