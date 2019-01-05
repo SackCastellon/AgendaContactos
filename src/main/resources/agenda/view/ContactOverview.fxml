@@ -15,7 +15,7 @@
                 <Insets bottom="7.0" left="7.0" right="7.0" top="7.0"/>
             </padding>
             <Label text="%overview.field.search"/>
-            <TextField fx:id="searchBox" prefColumnCount="20"/>
+            <TextField fx:id="searchBox" prefColumnCount="30"/>
         </HBox>
     </top>
     <center>
