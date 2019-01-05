@@ -44,6 +44,8 @@ class ContactOverview : Fragment(), KoinComponent {
     private val editContact: Button by fxid()
     private val deleteContact: Button by fxid()
 
+
+
     init {
         contactsTable.apply {
             column(messages["column.contacts"], Contact::fullNameProperty)
