@@ -1,43 +1,75 @@
 package agenda.view
 
+import agenda.data.dao.IDao
 import agenda.model.Contact
 import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
-import javafx.event.ActionEvent
-import javafx.fxml.FXML
 import javafx.scene.control.ButtonType
-import javafx.scene.control.Menu
 import javafx.scene.input.KeyCode.*
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination.CONTROL_DOWN
-import javafx.scene.layout.BorderPane
+import org.koin.standalone.KoinComponent
+import org.koin.standalone.get
 import tornadofx.*
+import tornadofx.controlsfx.statusbar
 
-class RootLayout : View() {
-
-    override val root: BorderPane by fxml(hasControllerAttribute = true)
+class RootLayout : View(), KoinComponent {
 
     private val selectedContact = SimpleObjectProperty<Contact>()
-    private val menuEdit: Menu by fxid()
+
+    override val root = borderpane {
+        prefHeight = 500.0
+        prefWidth = 500.0
+
+        top {
+            menubar {
+                menu(messages["menu.file"]) {
+                    item(messages["menu.file.export"]) {
+                        val contacts = get<IDao<Contact>>("contacts").observable
+                        disableWhen(booleanBinding(contacts, op = List<*>::isEmpty))
+                        action { find<ContactExporter> { openModal(resizable = false) } }
+                    }
+                    separator()
+                    item(messages["menu.file.quit"]) {
+                        action {
+                            confirmation(
+                                messages["confirmation.quitApp"],
+                                buttons = *arrayOf(ButtonType.YES, ButtonType.NO)
+                            ) { if (it == ButtonType.YES) Platform.exit() }
+                        }
+                    }
+                }
+                menu(messages["menu.edit"]) {
+                    item(messages["menu.edit.new"], KeyCodeCombination(N, CONTROL_DOWN)) {
+                        action { with(ContactEditor) { new() } }
+                    }
+                    item(messages["menu.edit.edit"], KeyCodeCombination(E, CONTROL_DOWN)) {
+                        disableWhen(selectedContact.isNull)
+                        action { with(ContactEditor) { edit(selectedContact.value!!) } }
+                    }
+                    item(messages["menu.edit.delete"], KeyCodeCombination(DELETE)) {
+                        disableWhen(selectedContact.isNull)
+                        action { with(ContactEditor) { delete(selectedContact.value!!) } }
+                    }
+                }
+                menu(messages["menu.help"]) {
+                    item(messages["menu.help.manual"]) {
+                        action { TODO("Open manual") }
+                    }
+                    item(messages["menu.help.about"]) {
+                        action { TODO("Open about dialog") }
+                    }
+                }
+            }
+        }
+        center = find<ContactOverview> { this@RootLayout.selectedContact.bind(selectedContact) }.root
+        bottom {
+            statusbar()
+        }
+    }
 
     init {
         title = messages["title"]
-
-        menuEdit.apply {
-            item(messages["menu.edit.new"], KeyCodeCombination(N, CONTROL_DOWN)) {
-                action { with(ContactEditor) { new() } }
-            }
-            item(messages["menu.edit.edit"], KeyCodeCombination(E, CONTROL_DOWN)) {
-                disableWhen(selectedContact.isNull)
-                action { with(ContactEditor) { edit(selectedContact.value!!) } }
-            }
-            item(messages["menu.edit.delete"], KeyCodeCombination(DELETE)) {
-                disableWhen(selectedContact.isNull)
-                action { with(ContactEditor) { delete(selectedContact.value!!) } }
-            }
-        }
-
-        root.center = find<ContactOverview> { this@RootLayout.selectedContact.bind(selectedContact) }.root
 
         runLater {
             currentStage?.apply {
@@ -47,23 +79,10 @@ class RootLayout : View() {
 
             primaryStage.setOnCloseRequest { event ->
                 confirmation(
-                    messages["alert.close.header"],
+                    messages["confirmation.quitApp"],
                     buttons = *arrayOf(ButtonType.YES, ButtonType.NO)
                 ) { if (it == ButtonType.NO) event.consume() }
             }
         }
-    }
-
-    @FXML
-    private fun handleExport(event: ActionEvent) {
-        find<ContactExporter> { openModal(resizable = false) }
-    }
-
-    @FXML
-    private fun handleQuit(event: ActionEvent) {
-        confirmation(
-            messages["alert.close.header"],
-            buttons = *arrayOf(ButtonType.YES, ButtonType.NO)
-        ) { if (it == ButtonType.YES) Platform.exit() }
     }
 }

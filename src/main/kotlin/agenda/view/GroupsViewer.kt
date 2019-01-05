@@ -27,7 +27,7 @@ class GroupsViewer : Fragment() {
             hbox {
                 addClass(CommonStyles.header)
                 vbox(5) {
-                    label(messages["title"])
+                    label(messages["group.title"])
                 }
             }
         }
@@ -52,23 +52,11 @@ class GroupsViewer : Fragment() {
                                     graphic = FontIcon.of(Material.REMOVE, 18)
 
                                     if (group.isDefault) {
-                                        parent.tooltip(messages["tooltip.defaultGroup"])
+                                        parent.tooltip(messages["group.tooltip.default"])
                                         isDisable = true
                                     } else {
-                                        tooltip(messages["tooltip.deleteGroup"])
-                                        action {
-                                            val isUsed = contacts.observable.any { contact -> group in contact.groups }
-
-                                            fun removeGroup() = groups.remove(group.id)
-
-                                            if (isUsed) {
-                                                warning(messages["alert.header"], messages["alert.header"], ButtonType.YES, ButtonType.NO) {
-                                                    if (it == ButtonType.YES) removeGroup()
-                                                }
-                                            } else {
-                                                removeGroup()
-                                            }
-                                        }
+                                        tooltip(messages["group.tooltip.delete"])
+                                        action { handleDeleteGroup(group) }
                                     }
                                 }
                             }
@@ -83,7 +71,7 @@ class GroupsViewer : Fragment() {
 
                         textfield(groupModel.name) {
                             hgrow = Priority.ALWAYS
-                            promptText = messages["field.newGroup.prompt"]
+                            promptText = messages["group.field.name"]
                             validator {
                                 when {
                                     it.isNullOrBlank() -> error(messages["error.field.blank"])
@@ -96,7 +84,7 @@ class GroupsViewer : Fragment() {
                         btn = button {
                             padding = insets(4)
                             graphic = FontIcon.of(Material.ADD, 18)
-                            tooltip(messages["tooltip.deleteGroup"])
+                            tooltip(messages["group.tooltip.add"])
                             action {
                                 groupModel.item.apply { name = name.trim() }
                                 groupModel.commit {
@@ -121,7 +109,21 @@ class GroupsViewer : Fragment() {
         }
     }
 
+    private fun handleDeleteGroup(group: Group) {
+        val isUsed = contacts.observable.any { contact -> group in contact.groups }
+
+        fun removeGroup() = groups.remove(group.id)
+
+        if (isUsed) {
+            warning(messages["group.warn.header"], messages["group.warn.deleteInUse"], ButtonType.YES, ButtonType.NO) {
+                if (it == ButtonType.YES) removeGroup()
+            }
+        } else {
+            removeGroup()
+        }
+    }
+
     init {
-        title = messages["title"]
+        title = messages["group.title"]
     }
 }

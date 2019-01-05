@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val koinVersion: String by project
@@ -7,6 +8,7 @@ plugins {
     application
     kotlin("jvm") version "1.3.11"
     id("com.github.ben-manes.versions") version "0.20.0"
+    id("com.github.johnrengelman.shadow") version "4.0.3"
 }
 
 version = "1.0-SNAPSHOT"
@@ -21,7 +23,7 @@ repositories {
 dependencies {
     // Kotlin Standard Library
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.1.0")
+    //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.1.0")
 
     // Dependency Injection
     implementation("org.koin:koin-core:$koinVersion")
@@ -36,7 +38,7 @@ dependencies {
     implementation("no.tornado:tornadofx:1.7.19-SNAPSHOT")
     implementation("no.tornado:tornadofx-controlsfx:0.1.1")
     implementation("org.controlsfx:controlsfx:8.40.14")
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12")
+    //implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12")
 
     // Icons
     implementation("org.kordamp.ikonli:ikonli-javafx:$ikonliVersion")
@@ -62,12 +64,19 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.3.0-alpha4")
     implementation("io.github.microutils:kotlin-logging:1.6.22")
 
+    implementation("org.apache.commons:commons-text:1.5")
+
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.2")
 }
 
 application {
-    mainClassName = "es.uji.ei1039.agenda.Agenda"
+    mainClassName = "agenda.Agenda"
+}
+
+tasks.withType<ShadowJar> {
+    baseName = "Agenda"
+    classifier = ""
 }
 
 tasks.withType<KotlinCompile> {

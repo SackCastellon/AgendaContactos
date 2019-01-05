@@ -6,13 +6,17 @@ interface IDao<T> {
     val observable: ObservableList<T>
     fun invalidate()
 
+    // Add data
+
     fun add(item: T): T
-    @JvmDefault
-    fun addAll(items: List<T>): List<T> = items.map { add(it) }
+    @JvmDefault fun addAll(items: List<T>): List<T> = items.map { add(it) }
+
+    // Get data
 
     operator fun get(id: Int): T?
     fun getAll(): List<T>
+
+    // Delete data
+
     fun remove(id: Int)
 }
-
-fun <T> IDao<T>.addAll(vararg items: T): List<T> = addAll(items.asList())

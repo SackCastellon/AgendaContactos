@@ -17,6 +17,7 @@ import ezvcard.parameter.EmailType
 import ezvcard.parameter.TelephoneType
 import ezvcard.property.StructuredName
 import io.github.soc.directories.UserDirectories
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.transformation.SortedList
 import javafx.geometry.Pos
@@ -24,6 +25,7 @@ import javafx.scene.control.ButtonBar
 import javafx.scene.control.ButtonType
 import javafx.stage.FileChooser.ExtensionFilter
 import mu.KotlinLogging
+import org.apache.commons.lang3.SystemUtils
 import org.koin.standalone.KoinComponent
 import org.koin.standalone.get
 import org.kordamp.ikonli.javafx.FontIcon
@@ -44,20 +46,21 @@ import kotlin.streams.asSequence
 
 private typealias ClassPropertiesCache = LoadingCache<KClass<out Any>, List<KProperty1<out Any, Any?>>>
 
-class ContactExporter : View(), KoinComponent {
+class ContactExporter : Fragment(), KoinComponent {
 
     private val contactsList: SortedList<Contact> = get<IDao<Contact>>("contacts").observable.sorted()
 
     private val field = SimpleObjectProperty<SortField>(SortField.FIRST_NAME)
     private val order = SimpleObjectProperty<SortOrder>(SortOrder.ASC)
     private val file = SimpleObjectProperty<String>(defaultFile.path)
+    private val showInFolder = SimpleBooleanProperty(false)
 
     override val root = borderpane {
         top {
             hbox {
                 addClass(CommonStyles.header)
                 vbox(5) {
-                    label(messages["title"])
+                    label(messages["export.title"])
                 }
             }
         }
@@ -88,6 +91,9 @@ class ContactExporter : View(), KoinComponent {
                         action(::selectOutputFile)
                     }
                 }
+                hbox(5, Pos.CENTER) {
+                    checkbox(messages["export.showInFolder"], showInFolder)
+                }
             }
         }
         bottom {
@@ -106,7 +112,7 @@ class ContactExporter : View(), KoinComponent {
     }
 
     init {
-        title = messages["title"]
+        title = messages["export.title"]
 
         contactsList.comparatorProperty().bind(objectBinding(field, order) { order.value.comparator(field.value.getter) })
 
@@ -132,28 +138,55 @@ class ContactExporter : View(), KoinComponent {
         val outFile = File(file.value)
 
         if (outFile.exists() && !outFile.isFile) {
-            warning(messages["warn.export.header"], messages["warn.export.content.path"], ButtonType.CLOSE)
+            warning(messages["export.warn.header"], messages["export.warn.invalidPath"], ButtonType.CLOSE)
         } else {
             val format = ExportFormat.byExtension(outFile.extension)
 
             if (format == null) {
                 warning(
-                    messages["warn.export.header"],
-                    messages["warn.export.content.format"].format(ExportFormat.values().joinToString { "(${it.extension})" }),
+                    messages["export.warn.header"],
+                    messages["export.warn.invalidFormat"].format(ExportFormat.values().joinToString { "(${it.extension})" }),
                     ButtonType.CLOSE
                 )
             } else {
                 with(format) { contactsList exportTo outFile }
+                if (showInFolder.value) outFile.showInDesktop()
+                close()
+            }
+        }
+    }
+
+    private fun File.showInDesktop() {
+        runLater {
+            val commands = when {
+                SystemUtils.IS_OS_WINDOWS -> listOf(listOf("explorer.exe", "/select,", absolutePath))
+                SystemUtils.IS_OS_MAC_OSX -> listOf(listOf("open", "-R", absolutePath))
+                SystemUtils.IS_OS_LINUX -> listOf(listOf("nautilus", absolutePath), listOf("dolphin", "--select", absolutePath))
+                else -> emptyList()
+            }
+
+            if (commands.isEmpty()) logger.error { "Unknown OS, cannot open file in system explorer" }
+            else commands.firstOrNull { cmd ->
+                ProcessBuilder(cmd).runCatching { start() }
+                    .onFailure { logger.error("Failed to run command: $cmd", it) }.isSuccess
             }
         }
     }
 
     companion object {
         private val logger = KotlinLogging.logger {}
-        private val defaultFile = File(
-            UserDirectories.get().documentDir,
-            "contacts" + ExportFormat.filters.first().extensions.first().substring(1)
-        ).absoluteFile
+
+        private val defaultFile: File
+            get() {
+                val dir = UserDirectories.get().documentDir!!
+                val name = "contacts"
+                val ext = ExportFormat.filters.first().extensions.first().substring(1)
+
+                return File(dir, "$name$ext")
+                    .takeIf { !it.exists() || !it.isFile } ?: (1..Int.MAX_VALUE).asSequence()
+                    .map { File(dir, "$name ($it)$ext") }
+                    .first { !it.exists() || !it.isFile }
+            }
     }
 
     private enum class ExportFormat(description: String, val extension: String) {

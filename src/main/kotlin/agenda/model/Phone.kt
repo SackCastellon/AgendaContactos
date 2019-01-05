@@ -74,7 +74,7 @@ sealed class Phone(
         MOBILE;
 
         companion object {
-            @JvmField val converter: StringConverter<Label> = StringConverter { FX.messages["phone.label.${it.name.toLowerCase()}"] }
+            @JvmField val converter: StringConverter<Label> = StringConverter { FX.messages["contact.phone.label.${it.name.toLowerCase()}"] }
         }
     }
 

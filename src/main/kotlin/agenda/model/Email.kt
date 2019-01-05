@@ -73,7 +73,7 @@ sealed class Email(
         WORK;
 
         companion object {
-            @JvmField val converter: StringConverter<Label> = StringConverter { FX.messages["email.label.${it.name.toLowerCase()}"] }
+            @JvmField val converter: StringConverter<Label> = StringConverter { FX.messages["contact.email.label.${it.name.toLowerCase()}"] }
         }
     }
 

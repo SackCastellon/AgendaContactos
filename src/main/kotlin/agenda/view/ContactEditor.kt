@@ -8,7 +8,6 @@ import agenda.model.Phone
 import agenda.view.styles.CommonStyles
 import agenda.view.styles.EditorStyles
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import javafx.application.Platform
 import javafx.collections.FXCollections
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -21,7 +20,6 @@ import org.koin.standalone.inject
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
-import javafx.scene.control.Alert.AlertType
 
 
 class ContactEditor : Fragment() {
@@ -51,8 +49,8 @@ class ContactEditor : Fragment() {
             hbox {
                 addClass(CommonStyles.header)
                 vbox(5) {
-                    label(messages["title"])
-                    label(messages["heading.${mode.name.toLowerCase()}"]) {
+                    label(messages["editor.title"])
+                    label(messages["editor.heading.${mode.name.toLowerCase()}"]) {
                         addClass(CommonStyles.heading)
                     }
                 }
@@ -71,20 +69,20 @@ class ContactEditor : Fragment() {
 
                     // Contact name
                     vbox(5) {
-                        label(messages["field.name"]).addClass(EditorStyles.fieldset)
+                        label(messages["editor.field.name"]).addClass(EditorStyles.fieldset)
                         textfield(model.firstName) {
-                            promptText = messages["field.name.first"]
+                            promptText = messages["editor.field.name.first"]
                             required(message = messages["error.field.blank"])
                         }
                         textfield(model.lastName) {
-                            promptText = messages["field.name.last"]
+                            promptText = messages["editor.field.name.last"]
                         }
                     }
 
                     // Contact phones
                     vbox(5) {
                         hbox(5, Pos.BOTTOM_LEFT) {
-                            label(messages["field.phones"]).addClass(EditorStyles.fieldset)
+                            label(messages["editor.field.phones"]).addClass(EditorStyles.fieldset)
                             spacer()
                             button {
                                 padding = insets(4)
@@ -102,7 +100,7 @@ class ContactEditor : Fragment() {
                                 textfield(it.phone) {
                                     hgrow = Priority.ALWAYS
                                     prefWidth = 100.0
-                                    promptText = messages["field.phone"]
+                                    promptText = messages["editor.field.phone"]
                                     requireValidPhone()
                                 }
                                 choicebox(it.label, Phone.Label.values().asList()) {
@@ -127,7 +125,7 @@ class ContactEditor : Fragment() {
                     // Contact emails
                     vbox(5) {
                         hbox(5, Pos.BOTTOM_LEFT) {
-                            label(messages["field.emails"]).addClass(EditorStyles.fieldset)
+                            label(messages["editor.field.emails"]).addClass(EditorStyles.fieldset)
                             spacer()
                             button {
                                 padding = insets(4)
@@ -145,7 +143,7 @@ class ContactEditor : Fragment() {
                                 textfield(it.email) {
                                     hgrow = Priority.ALWAYS
                                     prefWidth = 100.0
-                                    promptText = messages["field.email"]
+                                    promptText = messages["editor.field.email"]
                                     requireValidEmail()
                                 }
                                 choicebox(it.label, Email.Label.values().asList()) {
@@ -169,7 +167,7 @@ class ContactEditor : Fragment() {
 
                     // Contact groups
                     vbox(5) {
-                        label(messages["field.groups"]).addClass(EditorStyles.fieldset)
+                        label(messages["editor.field.groups"]).addClass(EditorStyles.fieldset)
                         textfield(model.groups.stringBinding { it?.joinToString(transform = Group::name).orEmpty() }) {
                             isEditable = false
                             setOnKeyPressed { if (it.code == KeyCode.SPACE || it.code == KeyCode.ENTER) openGroupSelector() }
@@ -208,7 +206,7 @@ class ContactEditor : Fragment() {
     }
 
     init {
-        title = messages["title"]
+        title = messages["editor.title"]
 
         runLater {
             currentStage?.apply {
@@ -264,7 +262,7 @@ class ContactEditor : Fragment() {
 
         @JvmStatic internal fun Component.delete(contact: Contact) {
             confirmation(
-                messages["contact.deleteWarning.title"], messages["contact.deleteWarning.message"],
+                messages["overview.confirm.delete"],
                 buttons = *arrayOf(ButtonType.YES, ButtonType.NO)
             ) { if (it == ButtonType.YES) contacts.remove(contact.id) }
         }

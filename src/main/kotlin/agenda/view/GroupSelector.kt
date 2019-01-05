@@ -27,7 +27,7 @@ class GroupSelector : Fragment() {
             hbox {
                 addClass(CommonStyles.header)
                 vbox(5) {
-                    label(messages["title"])
+                    label(messages["groups.title"])
                 }
             }
         }
@@ -64,7 +64,7 @@ class GroupSelector : Fragment() {
 
                         textfield(groupModel.name) {
                             hgrow = Priority.ALWAYS
-                            promptText = messages["field.newGroup.prompt"]
+                            promptText = messages["group.field.name"]
                             validator {
                                 when {
                                     it.isNullOrBlank() -> error(messages["error.field.blank"])
@@ -101,6 +101,6 @@ class GroupSelector : Fragment() {
     }
 
     init {
-        title = messages["title"]
+        title = messages["group.title"]
     }
 }

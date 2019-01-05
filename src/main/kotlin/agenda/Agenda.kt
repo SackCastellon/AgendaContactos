@@ -14,7 +14,7 @@ import java.util.*
 class Agenda : App(RootLayout::class, CommonStyles::class, EditorStyles::class) {
     override fun init() {
         FX.dicontainer = KoinContainer
-        FX.messagesNameProvider = { "bundles.${it?.simpleName ?: "Messages"}" }
+        FX.messagesNameProvider = { it?.simpleName ?: "bundles.Messages" }
 
         // TODO Remove temporal fix
         val tmp = FX.locale
