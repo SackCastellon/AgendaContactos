@@ -8,12 +8,10 @@ import agenda.model.Phone
 import agenda.view.styles.CommonStyles
 import agenda.view.styles.EditorStyles
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import javafx.application.Platform
 import javafx.collections.FXCollections
 import javafx.geometry.Pos
-import javafx.scene.control.ButtonBar
-import javafx.scene.control.ChoiceBox
-import javafx.scene.control.ScrollPane
-import javafx.scene.control.TextField
+import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
@@ -23,6 +21,8 @@ import org.koin.standalone.inject
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
+import javafx.scene.control.Alert.AlertType
+
 
 class ContactEditor : Fragment() {
 
@@ -263,8 +263,12 @@ class ContactEditor : Fragment() {
         }
 
         @JvmStatic internal fun Component.delete(contact: Contact) {
-            contacts.remove(contact.id)
+            confirmation(
+                messages["contact.deleteWarning.title"], messages["contact.deleteWarning.message"],
+                buttons = *arrayOf(ButtonType.YES, ButtonType.NO)
+            ) { if (it == ButtonType.YES) contacts.remove(contact.id) }
         }
+
     }
 
     enum class Mode { CREATE, EDIT }
