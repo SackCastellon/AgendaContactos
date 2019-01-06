@@ -1,10 +1,7 @@
 package agenda.view
 
 import agenda.data.dao.IDao
-import agenda.model.Contact
-import agenda.model.Email
-import agenda.model.Group
-import agenda.model.Phone
+import agenda.model.*
 import agenda.view.styles.CommonStyles
 import agenda.view.styles.EditorStyles
 import com.google.i18n.phonenumbers.PhoneNumberUtil
@@ -88,7 +85,7 @@ class ContactEditor : Fragment() {
                                 graphic = FontIcon.of(Material.ADD, 18)
                                 action {
                                     model.phones.apply {
-                                        val idSet = value.filter { it.isNew }.map { it.id }.toSet()
+                                        val idSet = value.filter(IData::isNew).map(IData::id).toSet()
                                         value.add(Phone.empty(idSet))
                                         markDirty()
                                     }
@@ -133,7 +130,7 @@ class ContactEditor : Fragment() {
                                 graphic = FontIcon.of(Material.ADD, 18)
                                 action {
                                     model.emails.apply {
-                                        val idSet = value.filter { it.isNew }.map { it.id }.toSet()
+                                        val idSet = value.filter(IData::isNew).map(IData::id).toSet()
                                         value.add(Email.empty(idSet))
                                         markDirty()
                                     }

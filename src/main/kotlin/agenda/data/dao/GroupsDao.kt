@@ -1,14 +1,14 @@
-@file:JvmName("Utils")
-@file:JvmMultifileClass
-
 package agenda.data.dao
 
 import agenda.data.DatabaseManager.dbQuery
 import agenda.data.table.Groups
 import agenda.model.Group
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.update
 
-object GroupsDao : AbstractDao<Group>() {
+object GroupsDao : AbstractDao<Group>(Groups) {
 
     override fun add(item: Group): Group {
         val id = dbQuery {
@@ -27,19 +27,6 @@ object GroupsDao : AbstractDao<Group>() {
         return get(id) ?: throw NoSuchElementException("Cannot find group with id: $id")
     }
 
-    override fun get(id: Int): Group? {
-        require(id >= 0)
-        return dbQuery {
-            Groups.select { Groups.id eq id }.singleOrNull()?.toGroup()
-        }
-    }
-
-    override fun getAll(): List<Group> {
-        return dbQuery {
-            Groups.selectAll().map { it.toGroup() }
-        }
-    }
-
     override fun remove(id: Int) {
         require(id >= 0)
         dbQuery {
@@ -49,8 +36,3 @@ object GroupsDao : AbstractDao<Group>() {
         }
     }
 }
-
-internal fun ResultRow.toGroup(): Group = Group.create(
-    id = this[Groups.id],
-    name = this[Groups.name]
-)

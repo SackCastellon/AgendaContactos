@@ -14,13 +14,13 @@ internal class ContactQueryTest {
     @BeforeEach
     fun setup() {
         contacts = listOf(
-            Contact.create(1, "Luis", "Garcia", emptyList(), emptyList(), emptyList()),
-            Contact.create(2, "Pedro", "Garcia", emptyList(), emptyList(), emptyList()),
-            Contact.create(3, "Maria", "Garcia", emptyList(), emptyList(), emptyList()),
-            Contact.create(4, "Maria", "Espinosa", emptyList(), emptyList(), emptyList()),
-            Contact.create(5, "Maria", "Lopez", emptyList(), emptyList(), emptyList()),
-            Contact.create(6, "Pepe", "Hernandez", emptyList(), emptyList(), emptyList()),
-            Contact.create(7, "Garcia", "Lopez", emptyList(), emptyList(), emptyList())
+            Contact.create(1, "Luis", "Garcia"),
+            Contact.create(2, "Pedro", "Garcia"),
+            Contact.create(3, "Maria", "Garcia"),
+            Contact.create(4, "Maria", "Espinosa"),
+            Contact.create(5, "Maria", "Lopez"),
+            Contact.create(6, "Pepe", "Hernandez"),
+            Contact.create(7, "Garcia", "Lopez")
         )
     }
 

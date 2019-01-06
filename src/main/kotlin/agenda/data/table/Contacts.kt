@@ -1,13 +1,20 @@
 package agenda.data.table
 
+import agenda.model.Contact
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.ReferenceOption.RESTRICT
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.Table
 
-internal object Contacts : Table() {
-    @JvmField val id = integer("id").autoIncrement().primaryKey()
+internal object Contacts : IdTable<Contact>() {
     @JvmField val firstName = varchar("first_name", 100)
     @JvmField val lastName = varchar("last_name", 100)
+
+    override fun ResultRow.toData(): Contact = Contact.create(
+        id = this[Contacts.id],
+        firstName = this[Contacts.firstName],
+        lastName = this[Contacts.lastName]
+    )
 }
 
 internal object ContactPhones : Table() {

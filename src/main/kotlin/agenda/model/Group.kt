@@ -10,12 +10,12 @@ import tornadofx.setValue
 
 sealed class Group(
     @get:JsonIgnore
-    val id: Int,
+    override val id: Int,
     name: String = ""
-) {
+) : IData {
     @Suppress("LeakingThis")
     @get:JsonIgnore
-    val isNew: Boolean = this is New
+    override val isNew: Boolean = this is New
 
     @get:JsonIgnore
     val nameProperty: StringProperty = SimpleStringProperty(name)

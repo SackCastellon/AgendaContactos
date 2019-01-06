@@ -1,19 +1,16 @@
-@file:JvmName("Utils")
-@file:JvmMultifileClass
-
 package agenda.data.dao
 
 import agenda.data.DatabaseManager.dbQuery
 import agenda.data.table.*
 import agenda.model.Contact
 import agenda.model.Email
-import agenda.model.Group
 import agenda.model.Phone
 import org.jetbrains.exposed.sql.*
 import org.koin.standalone.KoinComponent
 import org.koin.standalone.inject
+import tornadofx.observable
 
-object ContactsDao : AbstractDao<Contact>(), KoinComponent {
+object ContactsDao : AbstractDao<Contact>(Contacts), KoinComponent {
 
     private val phonesDao: IDao<Phone> by inject("phones")
     private val emailsDao: IDao<Email> by inject("emails")
@@ -91,45 +88,30 @@ object ContactsDao : AbstractDao<Contact>(), KoinComponent {
     override fun get(id: Int): Contact? {
         require(id >= 0)
         return dbQuery {
-            val phones = Phones.innerJoin(ContactPhones).select { ContactPhones.contactId eq id }.map { it.toPhone() }
-            val emails = Emails.innerJoin(ContactEmails).select { ContactEmails.contactId eq id }.map { it.toEmail() }
-            val groups = Groups.innerJoin(ContactGroups).select { ContactGroups.contactId eq id }.map { it.toGroup() }
-
-            Contacts.select { Contacts.id eq id }.firstOrNull()?.toContact(phones, emails, groups)
+            super.get(id)?.apply {
+                phones = with(Phones) { innerJoin(ContactPhones).select { ContactPhones.contactId eq id }.map { it.toData() } }.observable()
+                emails = with(Emails) { innerJoin(ContactEmails).select { ContactEmails.contactId eq id }.map { it.toData() } }.observable()
+                groups = with(Groups) { innerJoin(ContactGroups).select { ContactGroups.contactId eq id }.map { it.toData() } }.observable()
+            }
         }
     }
 
     override fun getAll(): List<Contact> {
         return dbQuery {
-            val phones = Phones.innerJoin(ContactPhones).selectAll()
-                .groupBy { it[ContactPhones.contactId] }.mapValues { (_, v) -> v.map { it.toPhone() } }
-            val emails = Emails.innerJoin(ContactEmails).selectAll()
-                .groupBy { it[ContactEmails.contactId] }.mapValues { (_, v) -> v.map { it.toEmail() } }
-            val groups = Groups.innerJoin(ContactGroups).selectAll()
-                .groupBy { it[ContactGroups.contactId] }.mapValues { (_, v) -> v.map { it.toGroup() } }
+            val phones =
+                with(Phones) { innerJoin(ContactPhones).selectAll().groupBy { it[ContactPhones.contactId] }.mapValues { it.value.map { it.toData() } } }
 
-            Contacts.selectAll().map {
-                val id = it[Contacts.id]
-                it.toContact(phones[id].orEmpty(), emails[id].orEmpty(), groups[id].orEmpty())
+            val emails =
+                with(Emails) { innerJoin(ContactEmails).selectAll().groupBy { it[ContactEmails.contactId] }.mapValues { it.value.map { it.toData() } } }
+
+            val groups =
+                with(Groups) { innerJoin(ContactGroups).selectAll().groupBy { it[ContactGroups.contactId] }.mapValues { it.value.map { it.toData() } } }
+
+            super.getAll().onEach {
+                it.phones = phones[it.id].orEmpty().observable()
+                it.emails = emails[it.id].orEmpty().observable()
+                it.groups = groups[it.id].orEmpty().observable()
             }
         }
     }
-
-    override fun remove(id: Int) {
-        require(id >= 0)
-        dbQuery {
-            Contacts.deleteWhere { Contacts.id eq id }
-        }.also {
-            if (it > 0) invalidate()
-        }
-    }
 }
-
-internal fun ResultRow.toContact(phones: List<Phone>, emails: List<Email>, groups: List<Group>): Contact = Contact.create(
-    id = this[Contacts.id],
-    firstName = this[Contacts.firstName],
-    lastName = this[Contacts.lastName],
-    phones = phones,
-    emails = emails,
-    groups = groups
-)

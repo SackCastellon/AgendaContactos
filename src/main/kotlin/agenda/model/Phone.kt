@@ -8,13 +8,13 @@ import tornadofx.*
 
 sealed class Phone(
     @get:JsonIgnore
-    val id: Int,
+    override val id: Int,
     phone: String = "",
     label: Label? = null
-) {
+) : IData {
     @Suppress("LeakingThis")
     @get:JsonIgnore
-    val isNew: Boolean = this is New
+    override val isNew: Boolean = this is New
 
     @get:JsonIgnore
     val phoneProperty: StringProperty = SimpleStringProperty(phone)

@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.sqlite.JDBC
 import org.sqlite.SQLiteDataSource
-import java.sql.Connection
+import java.sql.Connection.TRANSACTION_SERIALIZABLE
 import javax.sql.DataSource
 
 object DatabaseManager {
@@ -25,7 +25,7 @@ object DatabaseManager {
         }
     }
 
-    @JvmStatic internal fun <T> dbQuery(query: Transaction.() -> T): T = transaction(Connection.TRANSACTION_SERIALIZABLE, 1, db, query)
+    @JvmStatic internal fun <T> dbQuery(query: Transaction.() -> T): T = transaction(TRANSACTION_SERIALIZABLE, 1, db, query)
 
     @JvmStatic fun setup() {
         dbQuery {

@@ -8,13 +8,13 @@ import tornadofx.*
 
 sealed class Email(
     @get:JsonIgnore
-    val id: Int,
+    override val id: Int,
     email: String = "",
     label: Label? = null
-) {
+) : IData {
     @Suppress("LeakingThis")
     @get:JsonIgnore
-    val isNew: Boolean = this is New
+    override val isNew: Boolean = this is New
 
     @get:JsonIgnore
     val emailProperty: StringProperty = SimpleStringProperty(email)

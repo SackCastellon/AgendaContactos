@@ -1,6 +1,7 @@
 package agenda.util
 
 import agenda.model.Contact
+import agenda.model.IData
 import agenda.util.ContactQuery.Companion.FieldState.NAME
 import agenda.util.ContactQuery.Companion.FieldState.VALUE
 import agenda.util.ContactQuery.Companion.State.*
@@ -17,7 +18,7 @@ sealed class ContactQuery {
 
     private object EmptyQuery : ContactQuery() {
         override val predicate: (Contact) -> Boolean = { true }
-        override val comparator: Comparator<in Contact> = compareBy(Contact::id)
+        override val comparator: Comparator<in IData> = compareBy(IData::id)
         override fun toString(): String = this::class.simpleName ?: super.toString()
     }
 

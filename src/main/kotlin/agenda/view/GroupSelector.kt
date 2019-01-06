@@ -2,6 +2,7 @@ package agenda.view
 
 import agenda.data.dao.IDao
 import agenda.model.Group
+import agenda.model.IData
 import agenda.view.styles.CommonStyles
 import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleListProperty
@@ -48,7 +49,7 @@ class GroupSelector : Fragment() {
                                 runLater { isSelected = it in groupsList }
                                 selectedProperty().onChange { selected ->
                                     if (selected) {
-                                        val i = groupsList.binarySearchBy(it.id, selector = Group::id)
+                                        val i = groupsList.binarySearchBy(it.id, selector = IData::id)
                                         if (i < 0) groupsList.add(-i - 1, it)
                                     } else groupsList.remove(it)
                                 }

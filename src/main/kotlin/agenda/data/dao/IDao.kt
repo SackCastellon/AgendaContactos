@@ -1,8 +1,9 @@
 package agenda.data.dao
 
+import agenda.model.IData
 import javafx.collections.ObservableList
 
-interface IDao<T> {
+interface IDao<T : IData> {
     val observable: ObservableList<T>
     fun invalidate()
 

@@ -13,16 +13,16 @@ import tornadofx.setValue
 
 sealed class Contact(
     @get:JsonIgnore
-    val id: Int,
+    override val id: Int,
     firstName: String = "",
     lastName: String = "",
     phones: List<Phone> = emptyList(),
     emails: List<Email> = emptyList(),
     groups: List<Group> = emptyList()
-) {
+) : IData {
     @Suppress("LeakingThis")
     @get:JsonIgnore
-    val isNew: Boolean = this is New
+    override val isNew: Boolean = this is New
 
     @get:JsonIgnore
     val imageProperty: ObjectProperty<Image?> = SimpleObjectProperty() // TODO
@@ -89,22 +89,22 @@ sealed class Contact(
         @JvmStatic fun create(
             id: Int,
             firstName: String,
-            lastName: String,
-            phones: List<Phone>,
-            emails: List<Email>,
-            groups: List<Group>
-        ): Contact = Existing(id, firstName, lastName, phones, emails, groups)
+            lastName: String//,
+//            phones: List<Phone>,
+//            emails: List<Email>,
+//            groups: List<Group>
+        ): Contact = Existing(id, firstName, lastName/*, phones, emails, groups*/)
     }
 
     private class New : Contact(-1)
     private class Existing(
         id: Int,
         firstName: String,
-        lastName: String,
+        lastName: String/*,
         phones: List<Phone>,
         emails: List<Email>,
-        groups: List<Group>
-    ) : Contact(id, firstName, lastName, phones, emails, groups)
+        groups: List<Group>*/
+    ) : Contact(id, firstName, lastName/*, phones, emails, groups*/)
 
     class ViewModel(contact: Contact) : ItemViewModel<Contact>(contact) {
         val firstName: Property<String> = bind(Contact::firstNameProperty)
