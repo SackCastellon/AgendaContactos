@@ -1,6 +1,6 @@
 package agenda.model
 
-import agenda.model.converter.StringConverter
+import agenda.util.StringConverter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import javafx.beans.property.*
 import javafx.util.StringConverter

@@ -1,3 +1,6 @@
+@file:JvmName("Utils")
+@file:JvmMultifileClass
+
 package agenda.data.dao
 
 import agenda.data.DatabaseManager.dbQuery

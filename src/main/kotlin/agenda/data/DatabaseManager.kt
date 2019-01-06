@@ -16,7 +16,7 @@ import javax.sql.DataSource
 
 object DatabaseManager {
 
-    private val db: Database by lazy { Database.connect(dataSource()) }
+    @JvmStatic private val db: Database by lazy { Database.connect(dataSource()) }
 
     private fun dataSource(): DataSource {
         return SQLiteDataSource().apply {

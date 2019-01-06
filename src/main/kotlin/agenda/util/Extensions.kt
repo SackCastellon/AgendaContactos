@@ -1,3 +1,5 @@
+@file:JvmName("Extensions")
+
 package agenda.util
 
 import javafx.beans.property.ListProperty

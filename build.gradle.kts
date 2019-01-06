@@ -14,7 +14,6 @@ plugins {
 version = "1.0-SNAPSHOT"
 
 repositories {
-    mavenLocal()
     mavenCentral()
     jcenter()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
@@ -23,7 +22,6 @@ repositories {
 dependencies {
     // Kotlin Standard Library
     implementation(kotlin("stdlib-jdk8"))
-    //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.1.0")
 
     // Dependency Injection
     implementation("org.koin:koin-core:$koinVersion")
@@ -38,7 +36,6 @@ dependencies {
     implementation("no.tornado:tornadofx:1.7.19-SNAPSHOT")
     implementation("no.tornado:tornadofx-controlsfx:0.1.1")
     implementation("org.controlsfx:controlsfx:8.40.14")
-    //implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12")
 
     // Icons
     implementation("org.kordamp.ikonli:ikonli-javafx:$ikonliVersion")

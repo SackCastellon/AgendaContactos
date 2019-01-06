@@ -9,7 +9,6 @@ interface IDao<T> {
     // Add data
 
     fun add(item: T): T
-    @JvmDefault fun addAll(items: List<T>): List<T> = items.map { add(it) }
 
     // Get data
 

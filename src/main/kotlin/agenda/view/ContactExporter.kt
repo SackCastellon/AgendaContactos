@@ -4,7 +4,7 @@ import agenda.data.dao.IDao
 import agenda.model.Contact
 import agenda.model.Email
 import agenda.model.Phone
-import agenda.model.converter.StringConverter
+import agenda.util.StringConverter
 import agenda.view.styles.CommonStyles
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -43,8 +43,6 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.superclasses
 import kotlin.streams.asSequence
-
-private typealias ClassPropertiesCache = LoadingCache<KClass<out Any>, List<KProperty1<out Any, Any?>>>
 
 class ContactExporter : Fragment(), KoinComponent {
 
@@ -191,7 +189,7 @@ class ContactExporter : Fragment(), KoinComponent {
 
     private enum class ExportFormat(description: String, val extension: String) {
         TXT("Text file", "*.txt") {
-            private val properties: ClassPropertiesCache = Caffeine.newBuilder().build { kClass ->
+            private val properties: LoadingCache<KClass<out Any>, List<KProperty1<out Any, Any?>>> = Caffeine.newBuilder().build { kClass ->
                 val data2 = kClass.java.annotations.filterIsInstance<Metadata>().single().data2
                 kClass.memberProperties.filter { prop -> prop.getter.annotations.none { ann -> ann.annotationClass == JsonIgnore::class } }
                     .sortedBy { prop -> data2.indexOf(prop.name).takeIf { it >= 0 } ?: Int.MAX_VALUE }

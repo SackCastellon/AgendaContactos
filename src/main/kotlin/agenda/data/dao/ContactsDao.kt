@@ -1,3 +1,6 @@
+@file:JvmName("Utils")
+@file:JvmMultifileClass
+
 package agenda.data.dao
 
 import agenda.data.DatabaseManager.dbQuery
@@ -50,7 +53,7 @@ object ContactsDao : AbstractDao<Contact>(), KoinComponent {
                 item.id
             }
 
-            val newPhones = phonesDao.addAll(item.phones.filter { it.isNew })
+            val newPhones = item.phones.mapNotNull { phone -> phonesDao.add(phone).takeIf { phone.isNew } }
             ContactPhones.batchInsert(newPhones) { phone ->
                 let {
                     with(ContactPhones) {
@@ -60,7 +63,7 @@ object ContactsDao : AbstractDao<Contact>(), KoinComponent {
                 }
             }
 
-            val newEmails = emailsDao.addAll(item.emails.filter { it.isNew })
+            val newEmails = item.emails.mapNotNull { email -> emailsDao.add(email).takeIf { email.isNew } }
             ContactEmails.batchInsert(newEmails) { email ->
                 let {
                     with(ContactEmails) {
@@ -122,7 +125,7 @@ object ContactsDao : AbstractDao<Contact>(), KoinComponent {
     }
 }
 
-private fun ResultRow.toContact(phones: List<Phone>, emails: List<Email>, groups: List<Group>): Contact = Contact.create(
+internal fun ResultRow.toContact(phones: List<Phone>, emails: List<Email>, groups: List<Group>): Contact = Contact.create(
     id = this[Contacts.id],
     firstName = this[Contacts.firstName],
     lastName = this[Contacts.lastName],
