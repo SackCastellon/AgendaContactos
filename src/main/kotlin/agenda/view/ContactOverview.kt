@@ -6,6 +6,7 @@ import agenda.model.Email
 import agenda.model.Group
 import agenda.model.Phone
 import agenda.util.ContactQuery
+import agenda.util.selectFirst
 import agenda.util.selectList
 import javafx.beans.property.ReadOnlyObjectProperty
 import javafx.geometry.Pos
@@ -42,7 +43,6 @@ class ContactOverview : Fragment(), KoinComponent {
     private val editContact: Button by fxid()
     private val deleteContact: Button by fxid()
 
-
     init {
         contactsTable.apply {
             column(messages["overview.column.contacts"], Contact::fullNameProperty)
@@ -50,7 +50,18 @@ class ContactOverview : Fragment(), KoinComponent {
 
         val data = SortedFilteredList(get<IDao<Contact>>("contacts").observable).bindTo(contactsTable)
 
-        searchBox.textProperty().onChange { data.predicate = ContactQuery.parse(it.orEmpty()).predicate }
+
+        // Select first contact in list after filtering
+        searchBox.textProperty().onChange {
+            val query = ContactQuery.parse(it.orEmpty())
+            data.predicate = query.predicate
+            if (!query.isEmpty) runLater { contactsTable.selectFirst() }
+        }
+
+        // Reselect edited contact after edit finished
+        selectedContact.addListener { _, oldValue, newValue ->
+            if (oldValue != null && newValue == null) runLater { contactsTable.selectFirst { oldValue.id == it.id } }
+        }
 
 
         groups.apply {
@@ -62,12 +73,12 @@ class ContactOverview : Fragment(), KoinComponent {
         }
 
         editContact.apply {
-            action { with(ContactEditor) { edit(selectedContact.value!!) } }
+            action { with(ContactEditor) { edit(selectedContact.value!!.id) } }
             enableWhen(selectedContact.isNotNull)
         }
 
         deleteContact.apply {
-            action { with(ContactEditor) { delete(selectedContact.value!!) } }
+            action { with(ContactEditor) { delete(selectedContact.value!!.id) } }
             enableWhen(selectedContact.isNotNull)
         }
 
@@ -75,7 +86,7 @@ class ContactOverview : Fragment(), KoinComponent {
             removeWhen(selectedContact.isNull)
 
             // Contact image
-            imageview(selectedContact.select(Contact::imageProperty).objectBinding { it ?: DEFAULT_IMAGE }) {
+            imageview(selectedContact.select(Contact::imageProperty).objectBinding { it ?: defaultImage }) {
                 fitHeight = 100.0
                 fitWidth = 100.0
                 isPreserveRatio = true
@@ -171,9 +182,11 @@ class ContactOverview : Fragment(), KoinComponent {
 
     companion object {
         private val logger = KotlinLogging.logger {}
-        private val DEFAULT_IMAGE by lazy { Image("/images/grey_silhouette.png") }
-        private val SUPPORTS_BROWSE by lazy { Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE) }
+        private val defaultImage by lazy { Image("/images/grey_silhouette.png") }
+        private val SUPPORTS_BROWSE = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
 
-        private fun browse(uri: String): Unit = if (SUPPORTS_BROWSE) Desktop.getDesktop().browse(URI(uri)) else Unit
+        @JvmStatic private fun browse(uri: String) {
+            if (SUPPORTS_BROWSE) URI(uri).also { logger.debug { "Browsing URI: $it" } }.let { Desktop.getDesktop().browse(it) }
+        }
     }
 }

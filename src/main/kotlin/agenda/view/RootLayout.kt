@@ -45,11 +45,11 @@ class RootLayout : View(), KoinComponent {
                     }
                     item(messages["menu.edit.edit"], KeyCodeCombination(E, CONTROL_DOWN)) {
                         disableWhen(selectedContact.isNull)
-                        action { with(ContactEditor) { edit(selectedContact.value!!) } }
+                        action { with(ContactEditor) { edit(selectedContact.value!!.id) } }
                     }
                     item(messages["menu.edit.delete"], KeyCodeCombination(DELETE)) {
                         disableWhen(selectedContact.isNull)
-                        action { with(ContactEditor) { delete(selectedContact.value!!) } }
+                        action { with(ContactEditor) { delete(selectedContact.value!!.id) } }
                     }
                 }
                 menu(messages["menu.help"]) {

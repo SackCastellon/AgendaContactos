@@ -270,16 +270,16 @@ class ContactEditor : Fragment() {
             if (editor.success) contacts.add(editor.contact)
         }
 
-        @JvmStatic internal fun Component.edit(contact: Contact) {
-            val editor = find<ContactEditor>(ContactEditor::contact to contact) { openModal(block = true) }
+        @JvmStatic internal fun Component.edit(contactId: Int) {
+            val editor = find<ContactEditor>(ContactEditor::contact to contacts[contactId]) { openModal(block = true) }
             if (editor.success) contacts.add(editor.contact)
         }
 
-        @JvmStatic internal fun Component.delete(contact: Contact) {
+        @JvmStatic internal fun Component.delete(contactId: Int) {
             confirmation(
                 messages["overview.confirm.delete"],
                 buttons = *arrayOf(ButtonType.YES, ButtonType.NO)
-            ) { if (it == ButtonType.YES) contacts.remove(contact.id) }
+            ) { if (it == ButtonType.YES) contacts.remove(contactId) }
         }
     }
 

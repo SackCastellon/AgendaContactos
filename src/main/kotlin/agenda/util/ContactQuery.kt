@@ -12,6 +12,9 @@ sealed class ContactQuery {
     abstract val predicate: (Contact) -> Boolean
     abstract val comparator: Comparator<in Contact>
 
+    @Suppress("LeakingThis")
+    val isEmpty: Boolean = this is EmptyQuery
+
     private object EmptyQuery : ContactQuery() {
         override val predicate: (Contact) -> Boolean = { true }
         override val comparator: Comparator<in Contact> = compareBy(Contact::id)
