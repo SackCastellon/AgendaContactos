@@ -90,7 +90,8 @@ class ContactEditor : Fragment() {
                                 action {
                                     model.phones.apply {
                                         val idSet = value.filter { it.isNew }.map { it.id }.toSet()
-                                        value = (value + Phone.empty(idSet)).observable() // TODO Find a better solution
+                                        value.add(Phone.empty(idSet))
+                                        markDirty()
                                     }
                                 }
                             }
@@ -113,8 +114,9 @@ class ContactEditor : Fragment() {
                                     graphic = FontIcon.of(Material.REMOVE, 18)
                                     action {
                                         model.phones.apply {
-                                            val phone = value.first(it.item::equals)
-                                            value = (value - phone).observable() // TODO Find a better solution
+                                            val i = value.indexOfFirst(it.item::equals)
+                                            value.removeAt(i)
+                                            markDirty()
                                         }
                                     }
                                 }
@@ -133,7 +135,8 @@ class ContactEditor : Fragment() {
                                 action {
                                     model.emails.apply {
                                         val idSet = value.filter { it.isNew }.map { it.id }.toSet()
-                                        value = (value + Email.empty(idSet)).observable() // TODO Find a better solution
+                                        value.add(Email.empty(idSet))
+                                        markDirty()
                                     }
                                 }
                             }
@@ -156,8 +159,9 @@ class ContactEditor : Fragment() {
                                     graphic = FontIcon.of(Material.REMOVE, 18)
                                     action {
                                         model.emails.apply {
-                                            val email = value.first(it.item::equals)
-                                            value = (value - email).observable() // TODO Find a better solution
+                                            val i = value.indexOfFirst(it.item::equals)
+                                            value.removeAt(i)
+                                            markDirty()
                                         }
                                     }
                                 }
@@ -182,7 +186,10 @@ class ContactEditor : Fragment() {
                 addClass(CommonStyles.buttons)
                 button(messages["button.cancel"], ButtonBar.ButtonData.CANCEL_CLOSE) {
                     isCancelButton = true
-                    action(::close)
+                    action {
+                        cleanup()
+                        close()
+                    }
                 }
                 button(messages["button.save"], ButtonBar.ButtonData.OK_DONE) {
                     isDefaultButton = true
@@ -212,6 +219,8 @@ class ContactEditor : Fragment() {
             currentStage?.apply {
                 minWidth = 225.0
                 minHeight = 350.0
+
+                setOnCloseRequest { cleanup() }
             }
         }
     }
@@ -247,6 +256,12 @@ class ContactEditor : Fragment() {
         }
     }
 
+    // FIXME Workaround
+    private fun cleanup() {
+        model.phones.removeIf { it.isNew }
+        model.emails.removeIf { it.isNew }
+    }
+
     companion object : KoinComponent {
         private val contacts: IDao<Contact> by inject("contacts")
 
@@ -266,7 +281,6 @@ class ContactEditor : Fragment() {
                 buttons = *arrayOf(ButtonType.YES, ButtonType.NO)
             ) { if (it == ButtonType.YES) contacts.remove(contact.id) }
         }
-
     }
 
     enum class Mode { CREATE, EDIT }

@@ -1,6 +1,6 @@
 package agenda.util
 
-import io.github.soc.directories.BaseDirectories
+import io.github.soc.directories.ProjectDirectories
 import mu.KotlinLogging
 import java.nio.file.Files
 import java.nio.file.Path
@@ -9,7 +9,7 @@ import java.nio.file.Paths
 object Directories {
     private val logger = KotlinLogging.logger {}
 
-    private val root: Path = Paths.get(BaseDirectories.get().dataLocalDir, "UJI", "Agenda")
+    private val root: Path = Paths.get(ProjectDirectories.from(null, "UJI", "Agenda").dataDir).parent
 
     private val data: Path = root / "data"
 
@@ -20,9 +20,9 @@ object Directories {
     }
 
     @JvmStatic fun create() {
-        listOf(data)
+        listOf(root, data)
             .filter { Files.notExists(it) }
-            .also { if (it.isNotEmpty()) logger.debug { "Creating sub-directories:" } }
+            .also { if (it.isNotEmpty()) logger.debug { "Creating Directories:" } }
             .forEach { dir ->
                 kotlin.runCatching { Files.createDirectories(dir) }.fold(
                     onSuccess = { logger.debug { " [OK]  $dir" } },
@@ -30,7 +30,7 @@ object Directories {
                 )
             }
     }
-}
 
-@Suppress("NOTHING_TO_INLINE")
-private inline operator fun Path.div(other: String): Path = this.resolve(other)
+    @Suppress("NOTHING_TO_INLINE")
+    private inline operator fun Path.div(other: String): Path = this.resolve(other)
+}
