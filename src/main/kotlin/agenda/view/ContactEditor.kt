@@ -21,7 +21,6 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
 
-
 class ContactEditor : Fragment() {
 
     private val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
