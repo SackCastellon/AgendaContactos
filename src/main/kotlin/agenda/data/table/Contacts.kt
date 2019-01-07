@@ -1,14 +1,16 @@
 package agenda.data.table
 
 import agenda.model.Contact
+import agenda.util.NAME_LENGTH
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.ReferenceOption.RESTRICT
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.Table
 
 internal object Contacts : IdTable<Contact>() {
-    @JvmField val firstName = varchar("first_name", 100)
-    @JvmField val lastName = varchar("last_name", 100)
+
+    @JvmField val firstName = varchar("first_name", NAME_LENGTH)
+    @JvmField val lastName = varchar("last_name", NAME_LENGTH)
 
     override fun ResultRow.toData(): Contact = Contact.create(
         id = this[Contacts.id],

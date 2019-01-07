@@ -143,7 +143,7 @@ class ContactExporter : Fragment(), KoinComponent {
             if (format == null) {
                 warning(
                     messages["export.warn.header"],
-                    messages["export.warn.invalidFormat"].format(ExportFormat.values().joinToString { "(${it.extension})" }),
+                    messages.format("export.warn.invalidFormat", ExportFormat.values().joinToString { "(${it.extension})" }),
                     ButtonType.CLOSE
                 )
             } else {

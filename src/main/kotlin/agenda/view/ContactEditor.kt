@@ -2,16 +2,17 @@ package agenda.view
 
 import agenda.data.dao.IDao
 import agenda.model.*
+import agenda.util.NAME_LENGTH
+import agenda.util.isValidEmail
+import agenda.util.isValidPhone
 import agenda.view.styles.CommonStyles
 import agenda.view.styles.EditorStyles
-import com.google.i18n.phonenumbers.PhoneNumberUtil
 import javafx.collections.FXCollections
 import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
-import org.apache.commons.validator.routines.EmailValidator
 import org.koin.standalone.KoinComponent
 import org.koin.standalone.inject
 import org.kordamp.ikonli.javafx.FontIcon
@@ -19,9 +20,6 @@ import org.kordamp.ikonli.material.Material
 import tornadofx.*
 
 class ContactEditor : Fragment() {
-
-    private val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.getInstance()
-    private val emailValidator: EmailValidator = EmailValidator.getInstance()
 
     /** The contact to be edited. If no contact is passed, then a empty contact is created. */
     val contact: Contact by param(Contact.empty())
@@ -68,10 +66,20 @@ class ContactEditor : Fragment() {
                         label(messages["editor.field.name"]).addClass(EditorStyles.fieldset)
                         textfield(model.firstName) {
                             promptText = messages["editor.field.name.first"]
-                            required(message = messages["error.field.blank"])
+                            validator {
+                                when {
+                                    it == null || it.isBlank() -> error(messages["error.field.blank"]) // FIXME `it.isNullOrBlank()` throws KotlinFrontEndException
+                                    it.length > NAME_LENGTH -> error(messages.format("error.field.length", NAME_LENGTH, it.length))
+                                    else -> null
+                                }
+                            }
                         }
                         textfield(model.lastName) {
                             promptText = messages["editor.field.name.last"]
+                            validator {
+                                if (it != null && it.length > NAME_LENGTH) error(messages.format("error.field.length", NAME_LENGTH, it.length))
+                                else null
+                            }
                         }
                     }
 
@@ -224,7 +232,8 @@ class ContactEditor : Fragment() {
     private fun TextField.requireValidPhone() = validator {
         when {
             it.isNullOrBlank() -> error(messages["error.field.blank"])
-            !phoneUtil.runCatching { isValidNumber(parse(it, "ES")) }.getOrDefault(false) -> error(messages["error.field.invalidPhone"])
+            it.length > NAME_LENGTH -> error(messages.format("error.field.length", NAME_LENGTH, it.length))
+            !it.isValidPhone() -> error(messages["error.field.invalidPhone"])
             else -> null
         }
     }
@@ -232,7 +241,8 @@ class ContactEditor : Fragment() {
     private fun TextField.requireValidEmail() = validator {
         when {
             it.isNullOrBlank() -> error(messages["error.field.blank"])
-            !emailValidator.isValid(it) -> error(messages["error.field.invalidEmail"])
+            it.length > NAME_LENGTH -> error(messages.format("error.field.length", NAME_LENGTH, it.length))
+            !it.isValidEmail() -> error(messages["error.field.invalidEmail"])
             else -> null
         }
     }
