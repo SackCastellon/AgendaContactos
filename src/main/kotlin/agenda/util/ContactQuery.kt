@@ -1,7 +1,6 @@
 package agenda.util
 
-import agenda.model.Contact
-import agenda.model.IData
+import agenda.model.*
 import agenda.util.ContactQuery.Companion.FieldState.NAME
 import agenda.util.ContactQuery.Companion.FieldState.VALUE
 import agenda.util.ContactQuery.Companion.State.*
@@ -16,13 +15,13 @@ sealed class ContactQuery {
     @Suppress("LeakingThis")
     val isEmpty: Boolean = this is EmptyQuery
 
-    private object EmptyQuery : ContactQuery() {
+    internal object EmptyQuery : ContactQuery() {
         override val predicate: (Contact) -> Boolean = { true }
         override val comparator: Comparator<in IData> = compareBy(IData::id)
         override fun toString(): String = this::class.simpleName ?: super.toString()
     }
 
-    private data class SimpleQuery(private val words: Set<String>) : ContactQuery() {
+    internal data class SimpleQuery(internal val words: Set<String>) : ContactQuery() {
         private val cache = Caffeine.newBuilder()
             .build<Contact, Int> { contact ->
                 val fieldValues =
@@ -38,32 +37,46 @@ sealed class ContactQuery {
         override val comparator: Comparator<in Contact> = compareBy({ -cache[it]!! }, Contact::id)
     }
 
-    private data class ComplexQuery(private val words: Set<String>, private val fields: Map<String, Set<String>>) : ContactQuery() {
+    internal data class ComplexQuery(internal val words: Set<String>, internal val fields: Map<String, Set<String>>) : ContactQuery() {
         companion object {
             @JvmField internal val fieldMap = mapOf(
                 "firstName" to Contact::firstName.getter,
                 "lastName" to Contact::lastName.getter,
-                "fullName" to Contact::fullName.getter
+                "fullName" to Contact::fullName.getter,
+                "phones" to Contact::phones.getter,
+                "emails" to Contact::emails.getter,
+                "groups" to Contact::groups.getter
             )
         }
 
-        private val cache = Caffeine.newBuilder()
-            .build<Contact, Int> { contact ->
-                val count = fields.entries.sumBy { (name, values) ->
-                    val field = fieldMap.getValue(name).invoke(contact)
-                    values.count { field.contains(it, ignoreCase = true) }
-                }
-                if (count == 0) 0
-                else {
-                    val fieldValues =
-                        listOf(contact.fullName) +
-                                contact.phones.flatMap { listOf(it.label.name, it.phone) } +
-                                contact.emails.flatMap { listOf(it.label.name, it.email) } +
-                                contact.groups.map { it.name }
-
-                    words.sumBy { w -> fieldValues.count { it.contains(w, ignoreCase = true) } } + count
+        private val cache = Caffeine.newBuilder().build<Contact, Int> { contact ->
+            val count = fields.entries.sumBy { (fName, validValues) ->
+                val fValue = fieldMap.getValue(fName).invoke(contact)
+                validValues.sumBy { validValue ->
+                    when (fValue) {
+                        is List<*> -> fValue.asSequence().filterNotNull().flatMap { elem ->
+                            when (elem) {
+                                is Phone -> sequenceOf(elem.phone, Phone.Label.converter.toString(elem.label))
+                                is Email -> sequenceOf(elem.email, Email.Label.converter.toString(elem.label))
+                                is Group -> sequenceOf(elem.name)
+                                else -> throw IllegalArgumentException("Unsupported list type: ${elem::class}")
+                            }
+                        }.count { it.contains(validValue, ignoreCase = true) }
+                        is String -> if (fValue.contains(validValue, ignoreCase = true)) 1 else 0
+                        else -> throw IllegalArgumentException("Unsupported field type: ${fValue::class}")
+                    }
                 }
             }
+            if (count > 0) {
+                val fieldValues =
+                    listOf(contact.fullName) +
+                            contact.phones.flatMap { listOf(it.label.name, it.phone) } +
+                            contact.emails.flatMap { listOf(it.label.name, it.email) } +
+                            contact.groups.map { it.name }
+
+                words.sumBy { w -> fieldValues.count { it.contains(w, ignoreCase = true) } } + count
+            } else 0
+        }
 
         override val predicate: (Contact) -> Boolean = { cache[it]!! > 0 }
         override val comparator: Comparator<in Contact> = compareBy({ -cache[it]!! }, Contact::id)
