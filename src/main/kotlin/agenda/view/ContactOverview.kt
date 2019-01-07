@@ -6,6 +6,7 @@ import agenda.model.Email
 import agenda.model.Group
 import agenda.model.Phone
 import agenda.util.ContactQuery
+import agenda.util.browse
 import agenda.util.selectFirst
 import agenda.util.selectList
 import javafx.beans.property.ReadOnlyObjectProperty
@@ -18,13 +19,11 @@ import javafx.scene.input.Clipboard
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-import mu.KotlinLogging
 import org.koin.standalone.KoinComponent
 import org.koin.standalone.get
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
-import java.awt.Desktop
 import java.net.URI
 
 class ContactOverview : Fragment(), KoinComponent {
@@ -119,12 +118,12 @@ class ContactOverview : Fragment(), KoinComponent {
                         button {
                             padding = insets(4)
                             graphic = FontIcon.of(Material.PHONE, 19)
-                            action { browse("tel:${it.phone}") }
+                            action { browse(URI("tel:${it.phone}")) }
                         }
                         button {
                             padding = insets(4)
                             graphic = FontIcon.of(Material.SMS, 19)
-                            action { browse("sms:${it.phone}") }
+                            action { browse(URI("sms:${it.phone}")) }
                         }
                     }
                 }
@@ -155,7 +154,7 @@ class ContactOverview : Fragment(), KoinComponent {
                         button {
                             padding = insets(4)
                             graphic = FontIcon.of(Material.EMAIL, 19)
-                            action { browse("mailto:${it.email}") }
+                            action { browse(URI("mailto:${it.email}")) }
                         }
                     }
                 }
@@ -181,12 +180,6 @@ class ContactOverview : Fragment(), KoinComponent {
     }
 
     companion object {
-        private val logger = KotlinLogging.logger {}
         private val defaultImage by lazy { Image("/images/grey_silhouette.png") }
-        private val SUPPORTS_BROWSE = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
-
-        @JvmStatic private fun browse(uri: String) {
-            if (SUPPORTS_BROWSE) URI(uri).also { logger.debug { "Browsing URI: $it" } }.let { Desktop.getDesktop().browse(it) }
-        }
     }
 }

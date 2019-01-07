@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     // Kotlin Standard Library
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
 
     // Dependency Injection
     implementation("org.koin:koin-core:$koinVersion")
@@ -44,7 +44,6 @@ dependencies {
     // Databases
     implementation("org.jetbrains.exposed:exposed:0.11.2")
     implementation("org.xerial:sqlite-jdbc:3.25.2")
-    implementation("org.postgresql:postgresql:42.2.5")
 
     // Data Export
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")

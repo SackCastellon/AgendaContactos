@@ -1,11 +1,11 @@
 package agenda.data.table
 
 import agenda.model.Group
-import agenda.util.NAME_LENGTH
+import agenda.util.GROUP_LENGTH
 import org.jetbrains.exposed.sql.ResultRow
 
 internal object Groups : IdTable<Group>() {
-    @JvmField val name = varchar("name", NAME_LENGTH)
+    @JvmField val name = varchar("name", GROUP_LENGTH)
 
     override fun ResultRow.toData(): Group = Group.create(
         id = this[Groups.id],

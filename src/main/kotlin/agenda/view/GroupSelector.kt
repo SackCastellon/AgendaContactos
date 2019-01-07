@@ -3,6 +3,8 @@ package agenda.view
 import agenda.data.dao.IDao
 import agenda.model.Group
 import agenda.model.IData
+import agenda.util.GROUP_LENGTH
+import agenda.util.NAME_LENGTH
 import agenda.view.styles.CommonStyles
 import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleListProperty
@@ -69,6 +71,7 @@ class GroupSelector : Fragment() {
                             validator {
                                 when {
                                     it.isNullOrBlank() -> error(messages["error.field.blank"])
+                                    it.length > NAME_LENGTH -> error(messages.format("error.field.length", GROUP_LENGTH, it.length))
                                     groups.observable.any { group -> group.name == it } -> error(messages["error.field.nameAlreadyUsed"])
                                     else -> null
                                 }

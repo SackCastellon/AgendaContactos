@@ -6,8 +6,9 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil
 import org.apache.commons.validator.routines.EmailValidator
 
 const val NAME_LENGTH: Int = 100
-const val PHONE_LENGTH: Int = 25
+const val PHONE_LENGTH: Int = 20
 const val EMAIL_LENGTH: Int = 255
+const val GROUP_LENGTH: Int = 25
 
 private val phoneUtil: PhoneNumberUtil by lazy { PhoneNumberUtil.getInstance() }
 private val emailValidator: EmailValidator by lazy { EmailValidator.getInstance() }

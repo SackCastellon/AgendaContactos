@@ -4,6 +4,8 @@ import agenda.data.dao.IDao
 import agenda.model.Contact
 import agenda.model.Group
 import agenda.model.isDefault
+import agenda.util.GROUP_LENGTH
+import agenda.util.NAME_LENGTH
 import agenda.view.styles.CommonStyles
 import javafx.geometry.Pos
 import javafx.scene.control.Button
@@ -75,6 +77,7 @@ class GroupsViewer : Fragment() {
                             validator {
                                 when {
                                     it.isNullOrBlank() -> error(messages["error.field.blank"])
+                                    it.length > NAME_LENGTH -> error(messages.format("error.field.length", GROUP_LENGTH, it.length))
                                     groups.observable.any { group -> group.name == it.trim() } -> error(messages["error.field.nameAlreadyUsed"])
                                     else -> null
                                 }

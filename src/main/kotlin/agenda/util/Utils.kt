@@ -1,4 +1,4 @@
-@file:JvmName("Extensions")
+@file:JvmName("Utils")
 
 package agenda.util
 
@@ -10,6 +10,12 @@ import javafx.beans.value.ObservableValue
 import javafx.beans.value.WritableListValue
 import javafx.collections.ObservableList
 import javafx.scene.control.TableView
+import mu.KotlinLogging
+import java.awt.Desktop
+import java.io.File
+import java.net.URI
+
+private val logger = KotlinLogging.logger {}
 
 fun <T, N> ObservableValue<T>.selectList(nested: (T) -> ObservableListValue<N>): ListProperty<N> {
     fun extractNested() = value?.let(nested)
@@ -48,3 +54,9 @@ fun <T> TableView<T>.selectFirst(scrollTo: Boolean = true, condition: (T) -> Boo
         if (scrollTo) scrollTo(it)
     }
 }
+
+private val SUPPORTS_OPEN = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)
+private val SUPPORTS_BROWSE = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
+
+fun open(file: File): Unit = file.takeIf { SUPPORTS_OPEN }?.also { logger.debug { "Browsing: $it" } }?.let { Desktop.getDesktop().open(it) } ?: Unit
+fun browse(uri: URI): Unit = uri.takeIf { SUPPORTS_BROWSE }?.also { logger.debug { "Browsing: $it" } }?.let { Desktop.getDesktop().browse(it) } ?: Unit

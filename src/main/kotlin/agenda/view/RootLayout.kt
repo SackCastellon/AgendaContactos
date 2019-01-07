@@ -2,6 +2,7 @@ package agenda.view
 
 import agenda.data.dao.IDao
 import agenda.model.Contact
+import agenda.util.open
 import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.ButtonType
@@ -12,6 +13,8 @@ import org.koin.standalone.KoinComponent
 import org.koin.standalone.get
 import tornadofx.*
 import tornadofx.controlsfx.statusbar
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 class RootLayout : View(), KoinComponent {
 
@@ -54,10 +57,16 @@ class RootLayout : View(), KoinComponent {
                 }
                 menu(messages["menu.help"]) {
                     item(messages["menu.help.manual"]) {
-                        action { TODO("Open manual") }
+                        action {
+                            resources.stream("/documents/Manual de Usuario.pdf").use {
+                                val tmpFile = Files.createTempFile("ManualAgenda-", ".pdf")
+                                Files.copy(it, tmpFile, REPLACE_EXISTING)
+                                tmpFile.toFile().also(::open).deleteOnExit()
+                            }
+                        }
                     }
                     item(messages["menu.help.about"]) {
-                        action { TODO("Open about dialog") }
+                        action { find<AboutDialog> { openModal(resizable = false) } }
                     }
                 }
             }
