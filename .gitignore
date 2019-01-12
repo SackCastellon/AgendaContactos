@@ -5,6 +5,3 @@ out/
 # Gradle
 .gradle
 build/
-
-# Libraries
-/libs
