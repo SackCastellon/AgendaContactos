@@ -1,32 +1,74 @@
 package agenda.model
 
+import agenda.model.Data.Companion.checkId
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringExpression
 import javafx.beans.property.*
+import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import tornadofx.ItemViewModel
 import tornadofx.getValue
 import tornadofx.setValue
 
-class Contact : IContact {
-    val nameProperty: StringProperty = SimpleStringProperty()
-    override var name: String by nameProperty
+sealed class EditableContact(
+    id: Int,
+    firstName: String,
+    lastName: String,
+    phones: List<Phone>,
+    emails: List<Email>,
+    groups: List<Group>
+) : Contact(id, firstName, lastName, phones, emails, groups) {
+    // TODO Image
 
-    val surnameProperty: StringProperty = SimpleStringProperty()
-    override var surname: String by surnameProperty
+    val firstNameProperty: StringProperty = SimpleStringProperty(firstName)
+    override var firstName: String by firstNameProperty
 
-    val phonesProperty: ListProperty<Phone> = SimpleListProperty()
-    override val phones: ObservableList<Phone> by phonesProperty
+    val lastNameProperty: StringProperty = SimpleStringProperty(lastName)
+    override var lastName: String by lastNameProperty
 
-    val emailsProperty: ListProperty<Email> = SimpleListProperty()
-    override val emails: ObservableList<Email> by emailsProperty
+    val fullNameProperty: StringExpression = Bindings.format("%s %s", firstNameProperty, lastNameProperty)
+    override val fullName: String by fullNameProperty
 
-    val groupsProperty: ListProperty<Group> = SimpleListProperty()
-    override val groups: ObservableList<Group> by groupsProperty
+    val phonesProperty: ListProperty<Phone> = SimpleListProperty(FXCollections.observableArrayList(phones))
+    override var phones: ObservableList<Phone> by phonesProperty
 
-    class ViewModel(contact: Contact) : ItemViewModel<Contact>(contact) {
-        val name: Property<String> = bind(Contact::nameProperty)
-        val surname: Property<String> = bind(Contact::surnameProperty)
-        val phones: ObservableList<Phone> = bind(Contact::phonesProperty)
-        val emails: ObservableList<Email> = bind(Contact::emailsProperty)
-        val groups: ObservableList<Group> = bind(Contact::groupsProperty)
+    val emailsProperty: ListProperty<Email> = SimpleListProperty(FXCollections.observableArrayList(emails))
+    override var emails: ObservableList<Email> by emailsProperty
+
+    val groupsProperty: ListProperty<Group> = SimpleListProperty(FXCollections.observableArrayList(groups))
+    override var groups: ObservableList<Group> by groupsProperty
+
+    companion object {
+        fun empty(): EditableContact = New()
+        fun create(
+            id: Int,
+            firstName: String,
+            lastName: String,
+            phones: List<Phone>,
+            emails: List<Email>,
+            groups: List<EditableGroup>
+        ): EditableContact = Existing(id, firstName, lastName, phones, emails, groups)
+    }
+
+    private class New : EditableContact(newId, "", "", emptyList(), emptyList(), emptyList()), Data.New<Contact>
+    private class Existing(
+        id: Int,
+        firstName: String,
+        lastName: String,
+        phones: List<Phone>,
+        emails: List<Email>,
+        groups: List<Group>
+    ) : EditableContact(id, firstName, lastName, phones, emails, groups), Data.Existing<Contact> {
+        init {
+            checkId(id)
+        }
+    }
+
+    class ViewModel(contact: EditableContact = empty()) : ItemViewModel<EditableContact>(contact) {
+        val firstName: Property<String> = bind(EditableContact::firstNameProperty)
+        val lastName: Property<String> = bind(EditableContact::lastNameProperty)
+        val phones: ListProperty<Phone> = bind(EditableContact::phonesProperty)
+        val emails: ListProperty<Email> = bind(EditableContact::emailsProperty)
+        val groups: ListProperty<Group> = bind(EditableContact::groupsProperty)
     }
 }
