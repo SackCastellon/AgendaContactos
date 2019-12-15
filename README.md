@@ -6,9 +6,3 @@
 
 - Juan José González Abril ([@SackCastellon](https://github.com/SackCastellon))
 - Alejandro Fernandez Huguet ([@RinsedSloth](https://github.com/RinsedSloth))
-
-## Licencia
-
-<p align='center'><img src="https://i.creativecommons.org/l/by/4.0/88x31.png"><br>
-Esta obra creada por Juan José González y David Agost<br>
-está bajo una <a href="http://creativecommons.org/licenses/by/4.0/">licencia de Creative Commons Reconocimiento 4.0 Internacional</a></p>
